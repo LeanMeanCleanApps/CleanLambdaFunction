@@ -563,12 +563,15 @@ jobs:
           output-file: ${{ github.event.repository.name }}.spdx.json
           upload-artifact: false
           upload-release-assets: false
+        env:
+          SYFT_SOURCE_NAME: ${{ github.event.repository.name }}
+          SYFT_SOURCE_VERSION: ${{ needs.build.outputs.version }}
 
       - name: SBOM Summary
         id: sbom-summary
         run: |
           PACKAGES=$(python3 -c 'import json, sys; print(len(json.load(open(sys.argv[1])).get("packages", [])))' "$SBOM")
-          echo "SBOM: \`$SBOM\` lists $PACKAGES packages." >> "$GITHUB_STEP_SUMMARY"
+          echo "SBOM: \`$SBOM\` lists $PACKAGES packages." | tee --append "$GITHUB_STEP_SUMMARY"
         env:
           SBOM: ${{ github.event.repository.name }}.spdx.json
 
