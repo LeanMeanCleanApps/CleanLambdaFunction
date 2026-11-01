@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import sys
@@ -162,6 +163,13 @@ class HeadlineTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
+    def setUp(self):
+        # The commands print ::error:: lines for the runner. Swallow them here, or the Build job
+        # turns every deliberate failure in these tests into a red annotation on the run.
+        quiet = mock.patch("sys.stdout", new_callable=io.StringIO)
+        quiet.start()
+        self.addCleanup(quiet.stop)
+
     def test_test_command_fails_on_a_failed_run_or_low_coverage(self):
         full = COVERAGE.replace('sequenceCoverage="75"', 'sequenceCoverage="100"')
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": os.path.join(directory, "summary.md")}):
