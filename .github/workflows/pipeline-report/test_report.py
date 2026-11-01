@@ -158,12 +158,23 @@ class HeadlineTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
-    def test_test_command_returns_the_recorded_exit_code(self):
+    def test_test_command_fails_on_a_failed_run_or_low_coverage(self):
+        full = COVERAGE.replace('sequenceCoverage="75"', 'sequenceCoverage="100"')
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": os.path.join(directory, "summary.md")}):
-            write_results(directory, exit_code="1")
+            write_results(directory, exit_code="1", coverage=full)
             self.assertEqual(report.command_test(directory), 1)
-            write_results(directory, exit_code="0")
+            write_results(directory, exit_code="0", coverage=COVERAGE)
+            self.assertEqual(report.command_test(directory), 1)
+            write_results(directory, exit_code="0", coverage=full)
             self.assertEqual(report.command_test(directory), 0)
+            with mock.patch.dict(os.environ, {"COVERAGE_THRESHOLD": "70"}):
+                write_results(directory, exit_code="0", coverage=COVERAGE)
+                self.assertEqual(report.command_test(directory), 0)
+
+    def test_test_command_fails_without_coverage(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": os.path.join(directory, "summary.md")}):
+            write_results(directory, exit_code="0", coverage=None)
+            self.assertEqual(report.command_test(directory), 1)
 
     def test_test_command_fails_without_an_exit_code(self):
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": os.path.join(directory, "summary.md")}):

@@ -161,8 +161,7 @@ jobs:
             --target results \
             --output type=local,dest=results \
             --build-arg VERSION_PREFIX="$VERSION_PREFIX" \
-            --build-arg VERSION_SUFFIX="$VERSION_SUFFIX" \
-            --build-arg COVERAGE_THRESHOLD="$COVERAGE_THRESHOLD"
+            --build-arg VERSION_SUFFIX="$VERSION_SUFFIX"
         env:
           DOCKER_BUILDKIT: 1
           VERSION_PREFIX: ${{ needs.build.outputs.version_prefix }}

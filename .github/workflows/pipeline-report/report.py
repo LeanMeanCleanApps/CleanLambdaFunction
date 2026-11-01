@@ -5,8 +5,8 @@ Two commands, both standard library only:
 
   report.py test --results DIR
       Reads the .trx test results, the OpenCover coverage report and the test exit code
-      exported by the Dockerfile's results stage. Writes the Test job summary and exits
-      with the test run's exit code, so failing tests or low coverage fail the job.
+      exported by the Dockerfile's results stage. Writes the Test job summary and fails
+      if any test failed or line coverage is below COVERAGE_THRESHOLD (95 by default).
 
   report.py summary --results DIR
       Reads every stage's result from the NEEDS environment variable (toJSON(needs)),
@@ -394,17 +394,23 @@ def threshold() -> float:
 def command_test(results: str) -> int:
     tests, coverage, exit_code = read_results(results)
     write_step_summary(render_tests(tests, coverage, threshold()))
+    failed = False
     if exit_code is None:
         print("::error::The test stage didn't record an exit code")
-        return 1
-    if exit_code != 0:
+        failed = True
+    elif exit_code != 0:
         if tests is not None and tests.failed:
             print(f"::error::{tests.failed} test{'s' if tests.failed != 1 else ''} failed")
-        elif coverage is not None and coverage.percent < threshold():
-            print(f"::error::Line coverage {format_percent(coverage.percent)} is below {format_percent(threshold())}")
         else:
             print(f"::error::dotnet test exited with {exit_code}")
-    return exit_code
+        failed = True
+    if coverage is None:
+        print("::error::No coverage report was produced")
+        failed = True
+    elif coverage.percent < threshold():
+        print(f"::error::Line coverage {format_percent(coverage.percent)} is below {format_percent(threshold())}")
+        failed = True
+    return 1 if failed else 0
 
 
 def command_summary(results: str) -> int:

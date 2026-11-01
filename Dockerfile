@@ -36,16 +36,16 @@ RUN dotnet build --no-restore -c Release -v minimal -p:VersionPrefix=${VERSION_P
 
 # Dotnet Test
 # The exit code is saved rather than failing the build, so the results can still be exported
-# and reported. Coverlet fails the run if line coverage drops below the threshold.
+# and reported. Coverlet merges every test project's coverage into one report, and the pipeline
+# checks that report against the threshold. A per-project Coverlet threshold can't be used here,
+# because it would judge each project on a partly merged report.
 FROM build AS test
-ARG COVERAGE_THRESHOLD=95
 RUN mkdir -p /sln/tests/results; \
     dotnet test --no-restore --no-build -c Release -v minimal -m:1 \
       --logger "trx;LogFilePrefix=tests" --results-directory /sln/tests/results \
       -p:CollectCoverage=true -p:CoverletOutput=../results/ -p:MergeWith="../results/coverage.json" \
       -p:CoverletOutputFormat=opencover%2cjson -p:ExcludeByFile="**/Migrations/*.cs%2c**/obj/**/*.cs" \
-      -p:ExcludeByAttribute="GeneratedCodeAttribute" \
-      -p:Threshold=${COVERAGE_THRESHOLD} -p:ThresholdType=line -p:ThresholdStat=total; \
+      -p:ExcludeByAttribute="GeneratedCodeAttribute"; \
     echo $? > /sln/tests/results/exit-code
 
 FROM scratch AS results
