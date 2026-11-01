@@ -216,14 +216,14 @@ def render_summary(stages: list[Stage], pull_request: bool, run_url: str, sha: s
     ]
     for stage in stages:
         name = f"[{stage.name}]({stage.link})" if stage.link else stage.name
-        out.append(f"| {name} | {ICONS.get(stage.result, stage.result)} | {cell(capitalise(stage.headline))} |")
+        out.append(f"| {name} | {ICONS.get(stage.result, stage.result)} | {cell(SEPARATOR.join(capitalise(part) for part in stage.headline.split(SEPARATOR)))} |")
     short = sha[:7] if sha else "unknown"
     out += ["", f"<sub>Commit `{short}` · [Full run]({run_url})</sub>"]
     return "\n".join(out) + "\n"
 
 
 def capitalise(text: str) -> str:
-    """Details start with a capital or a number; the verdict line keeps them lower case mid-sentence."""
+    """Each part of a detail starts with a capital or a number; the verdict line keeps them lower case."""
     return text[:1].upper() + text[1:]
 
 
