@@ -66,4 +66,8 @@ RUN dnf upgrade -y --releasever=latest && dnf clean all
 
 WORKDIR /var/task
 COPY --from=publish /sln/app .
+
+# Run as nobody, not root. AWS Lambda already does this in the cloud; this makes the local
+# emulator behave the same and keeps the container scan happy. A numeric id needs no passwd entry.
+USER 65534:65534
 CMD [ "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler::GetMovies" ]
