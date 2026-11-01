@@ -170,6 +170,11 @@ class HeadlineTests(unittest.TestCase):
         stage = report.Stage("Static Analysis", "success", "no open CodeQL alerts")
         self.assertIn("| No open CodeQL alerts |", report.render_summary([stage], True, "https://run", "abc1234"))
 
+    def test_smoke_headline_leads_the_container_scan(self):
+        self.assertEqual(report.smoke_headline({"scan": {"outputs": {"smoke": "passed"}}}), "image starts and answers · ")
+        self.assertEqual(report.smoke_headline({"scan": {"outputs": {"smoke": "failed"}}}), "image didn't start or answer · ")
+        self.assertEqual(report.smoke_headline({}), "")
+
     def test_dependency_headline_when_skipped(self):
         self.assertEqual(report.dependency_headline({"dependencies": {"result": "skipped"}}), "didn't run")
 

@@ -273,6 +273,9 @@ jobs:
       contents: read
       security-events: write
 
+    outputs:
+      smoke: ${{ steps.smoke.outputs.smoke }}
+
     steps:
       - name: Checkout
         id: checkout
@@ -287,6 +290,37 @@ jobs:
       - name: Load Image
         id: load
         run: docker load --input image.tar
+
+      - name: Smoke Test
+        id: smoke
+        # Carry on to the scans when this fails; Enforce Smoke Test fails the job at the end.
+        continue-on-error: true
+        env:
+          IMAGE: ${{ needs.build.outputs.name }}:${{ needs.build.outputs.version }}
+        run: |
+          # Start the image the way the README does and ask it for a page of movies. Scanning an
+          # image proves nothing about whether it runs, so this is the check that it actually does.
+          echo "smoke=failed" >> "$GITHUB_OUTPUT"
+          docker run --detach --name function --publish 9000:8080 --env Database__SeedSampleData=true "$IMAGE"
+          for attempt in $(seq 1 30); do
+            if RESPONSE=$(curl --silent --fail --max-time 30 -X POST http://localhost:9000/2015-03-31/functions/function/invocations -d '{ "limit": 2 }'); then
+              break
+            fi
+            sleep 1
+          done
+          echo "$RESPONSE"
+          if echo "$RESPONSE" | python3 -c 'import json, sys; sys.exit(0 if json.load(sys.stdin).get("Items") else 1)'; then
+            echo "smoke=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::The image started but didn't return any movies"
+            docker logs function
+            exit 1
+          fi
+
+      - name: Stop Container
+        id: stop
+        if: ${{ always() }}
+        run: docker rm --force function || true
 
       - name: Scan Image
         id: scan-image
@@ -348,6 +382,13 @@ jobs:
           trivyignores: .trivyignore
           exit-code: 1
           skip-setup-trivy: true
+
+      - name: Enforce Smoke Test
+        id: enforce-smoke
+        if: ${{ !cancelled() && steps.smoke.outcome == 'failure' }}
+        run: |
+          echo "::error::The image didn't start or answer a request; see the Smoke Test step"
+          exit 1
 
   summary:
     name: Summary

@@ -287,6 +287,16 @@ def alerts_headline(alerts: list[dict] | None, what: str, passed: bool = False) 
     return f"{len(alerts)} open {what} alert{'s' if len(alerts) != 1 else ''}{blocking}: {text}"
 
 
+def smoke_headline(needs: dict) -> str:
+    """Leads the Container Scan details: whether the image started and answered a request."""
+    smoke = needs.get("scan", {}).get("outputs", {}).get("smoke", "")
+    if smoke == "passed":
+        return f"image starts and answers{SEPARATOR}"
+    if smoke == "failed":
+        return f"image didn't start or answer{SEPARATOR}"
+    return ""
+
+
 def dependency_headline(needs: dict) -> str:
     if stage_result(needs, "dependencies") in ("skipped", "cancelled"):
         return "didn't run"
@@ -506,8 +516,9 @@ def command_summary(results: str) -> int:
         Stage(
             "Container Scan",
             scan,
-            (alerts_headline(trivy, "Trivy", scan == "success") + (f"{SEPARATOR}{ignored} ignored in .trivyignore" if ignored else "")) if scan in ("success", "failure") else "didn't run",
+            smoke_headline(needs) + (alerts_headline(trivy, "Trivy", scan == "success") + (f"{SEPARATOR}{ignored} ignored in .trivyignore" if ignored else "")) if scan in ("success", "failure") else "didn't run",
             security + urllib.parse.quote(" tool:Trivy"),
+            "the image didn't start or answer a request" if needs.get("scan", {}).get("outputs", {}).get("smoke") == "failed" else "",
         ),
     ]
 
