@@ -50,7 +50,7 @@ dotnet new uninstall ./
 
 ## Making a change
 
-1. Create a branch from `main` named `feature/`, `fix/` or `chore/` followed by a short description, for example `fix/review-validation`.
+1. Create a branch from `main` named `feature/`, `fix/` or `chore/` followed by a short description, for example `fix/review-validation`. The repository rejects any other branch name (Dependabot is the one exception), and the prefix decides the release notes label: `feature/` is a new feature, `fix/` is a bug fix, and `chore/` lands under other changes.
 1. Keep the change focused. Unrelated refactors are easier to review as separate pull requests.
 1. Add or update tests. The pipeline fails if line coverage drops below 95%. It doesn't negotiate, and neither does the maintainer.
 1. Follow the style in `.editorconfig` and `Directory.Build.props`. Warnings are treated as errors, so the build must be clean. A warning is just an error that hasn't been caught yet.
