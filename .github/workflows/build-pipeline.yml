@@ -534,6 +534,39 @@ jobs:
           DRY_RUN: ${{ needs.release.outputs.dry-run == 'true' && 'yes' || '' }}
         shell: bash
 
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        id: setup
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish Function
+        id: publish-function
+        run: dotnet publish ./src/Presentation/Presentation.csproj --configuration Release --output sbom-source --no-self-contained
+
+      - name: SBOM
+        id: sbom
+        # The bill of materials for what the template generates: every package the function ships with.
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: sbom-source
+          format: spdx-json
+          output-file: ${{ github.event.repository.name }}.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: SBOM Summary
+        id: sbom-summary
+        run: |
+          PACKAGES=$(python3 -c 'import json, sys; print(len(json.load(open(sys.argv[1])).get("packages", [])))' "$SBOM")
+          echo "SBOM: \`$SBOM\` lists $PACKAGES packages." >> "$GITHUB_STEP_SUMMARY"
+        env:
+          SBOM: ${{ github.event.repository.name }}.spdx.json
+
       - name: Attest
         id: attest
         if: ${{ needs.release.outputs.dry-run != 'true' }}
@@ -551,9 +584,10 @@ jobs:
       - name: GitHub Release
         id: github-release
         if: ${{ needs.release.outputs.dry-run != 'true' }}
-        run: gh release create "$VERSION" packages/*.nupkg --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$VERSION" --notes "$NOTES" --generate-notes
+        run: gh release create "$VERSION" packages/*.nupkg "$SBOM" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$VERSION" --notes "$NOTES" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.build.outputs.version }}
           NOTES: ${{ steps.notes.outputs.notes }}
+          SBOM: ${{ github.event.repository.name }}.spdx.json
         shell: bash

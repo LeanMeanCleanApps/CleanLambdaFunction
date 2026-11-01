@@ -114,7 +114,7 @@ The [architecture page](https://leanmeancleanapps.github.io/lambda/explanation/a
 
 ## Releases
 
-A new version lands on the 1st of each month, as long as something changed, with notes for every pull request in the [GitHub release](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/releases). No changes, no release. We're not here to pad the download stats.
+A new version lands on the 1st of each month, as long as something changed, with notes for every pull request in the [GitHub release](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/releases). No changes, no release. We're not here to pad the download stats. Each release also carries an SPDX bill of materials listing every package the function ships with, for anyone whose security team asks nicely (or not so nicely).
 
 ```bash
 dotnet new update
