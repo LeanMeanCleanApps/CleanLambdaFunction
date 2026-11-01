@@ -393,9 +393,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: summary
     # Only once the Summary has passed. Real releases come from main on the 1st or a manual run;
-    # dry runs can come from any branch.
+    # dry runs can come from any branch. The explicit !cancelled() matters: without it GitHub skips
+    # this job whenever anything upstream was skipped, and Dependency Review always is outside PRs.
     if: >-
-      ${{ github.repository_owner == 'LeanMeanCleanApps' && (
+      ${{ !cancelled() && needs.summary.result == 'success' && github.repository_owner == 'LeanMeanCleanApps' && (
         (github.ref == 'refs/heads/main' && github.event.schedule == '17 9 1 * *') ||
         (github.event_name == 'workflow_dispatch' && inputs.run == 'release' && (inputs.dry-run || github.ref == 'refs/heads/main'))
       ) }}
