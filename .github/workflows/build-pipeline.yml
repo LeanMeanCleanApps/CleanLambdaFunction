@@ -353,7 +353,9 @@ jobs:
     name: Summary
     runs-on: ubuntu-latest
     needs: [build, test, analysis, dependencies, scan]
-    if: ${{ always() }}
+    # Report on failures too, but not when a newer push cancelled this run: its stale result would
+    # overwrite the comment the newer run is about to write.
+    if: ${{ !cancelled() }}
     permissions:
       actions: read
       contents: read
