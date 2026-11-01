@@ -124,7 +124,7 @@ jobs:
 
       - name: Test Pipeline Report
         id: test-report
-        run: python3 -m unittest discover --start-directory .github/workflows/pipeline-report --verbose
+        run: python3 -m unittest discover --start-directory .github/actions/pipeline-report --verbose
 
       - name: Upload Image
         id: upload-image
@@ -172,7 +172,11 @@ jobs:
 
       - name: Report
         id: report
-        run: python3 .github/workflows/pipeline-report/report.py test --results results
+        uses: ./.github/actions/pipeline-report
+        with:
+          command: test
+          results: results
+          coverage-threshold: ${{ env.COVERAGE_THRESHOLD }}
 
       - name: Upload Results
         id: upload-results
@@ -409,7 +413,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            .github/workflows/pipeline-report
+            .github/actions/pipeline-report
             .trivyignore
           sparse-checkout-cone-mode: false
 
@@ -423,11 +427,12 @@ jobs:
 
       - name: Report
         id: report
-        run: python3 .github/workflows/pipeline-report/report.py summary --results results
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          NEEDS: ${{ toJSON(needs) }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+        uses: ./.github/actions/pipeline-report
+        with:
+          command: summary
+          results: results
+          coverage-threshold: ${{ env.COVERAGE_THRESHOLD }}
+          needs: ${{ toJSON(needs) }}
 
   release:
     name: Release Check
