@@ -149,6 +149,9 @@ jobs:
     permissions:
       contents: read
 
+    outputs:
+      tests: ${{ steps.report.outputs.tests }}
+
     steps:
       - name: Checkout
         id: checkout

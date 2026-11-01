@@ -239,7 +239,7 @@ def build_headline(needs: dict) -> str:
     return ", ".join(parts) or "built"
 
 
-def test_headline(result: str, tests: TestResults | None, coverage: Coverage | None, threshold: float) -> str:
+def test_headline(result: str, tests: TestResults | None, coverage: Coverage | None, threshold: float, tests_outcome: str = "") -> str:
     parts = []
     if tests is not None:
         parts.append(f"{tests.passed} passed, {tests.failed} failed, {tests.skipped} skipped")
@@ -247,8 +247,8 @@ def test_headline(result: str, tests: TestResults | None, coverage: Coverage | N
         parts.append(f"line coverage {format_percent(coverage.percent)} (needs {format_percent(threshold)})")
     if result == "success":
         parts.append("template installs, builds and passes its tests")
-    elif result == "failure" and tests is not None and tests.failed == 0 and coverage is not None and coverage.percent >= threshold:
-        parts.append("the generated template failed to build or test")
+    elif result == "failure" and tests_outcome == "passed":
+        parts.append("but the generated template failed to build or test")
     return ", ".join(parts) or "no test results"
 
 
@@ -268,6 +268,8 @@ def alerts_headline(alerts: list[dict] | None, what: str) -> str:
 
 
 def dependency_headline(needs: dict) -> str:
+    if stage_result(needs, "dependencies") in ("skipped", "cancelled"):
+        return "didn't run"
     outputs = needs.get("dependencies", {}).get("outputs", {})
     vulnerable = count_json(outputs.get("vulnerable"))
     licences = count_json(outputs.get("licences"))
@@ -374,6 +376,13 @@ def count_json(value: str | None) -> int | None:
     return len(parsed) if isinstance(parsed, list) else None
 
 
+def write_output(name: str, value: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(f"{name}={value}\n")
+
+
 def write_step_summary(text: str) -> None:
     path = os.environ.get("GITHUB_STEP_SUMMARY")
     if path:
@@ -410,6 +419,7 @@ def command_test(results: str) -> int:
     elif coverage.percent < threshold():
         print(f"::error::Line coverage {format_percent(coverage.percent)} is below {format_percent(threshold())}")
         failed = True
+    write_output("tests", "failed" if failed else "passed")
     return 1 if failed else 0
 
 
@@ -451,7 +461,12 @@ def command_summary(results: str) -> int:
 
     stages = [
         Stage("Build", stage_result(needs, "build"), build_headline(needs), job_link("Build")),
-        Stage("Test", stage_result(needs, "test"), test_headline(stage_result(needs, "test"), tests, coverage, threshold()), job_link("Test")),
+        Stage(
+            "Test",
+            stage_result(needs, "test"),
+            test_headline(stage_result(needs, "test"), tests, coverage, threshold(), needs.get("test", {}).get("outputs", {}).get("tests", "")),
+            job_link("Test"),
+        ),
         Stage("Static Analysis", analysis, alerts_headline(codeql, "CodeQL") if analysis in ("success", "failure") else "didn't run", security + urllib.parse.quote(" tool:CodeQL")),
         Stage(
             "Dependency Review",

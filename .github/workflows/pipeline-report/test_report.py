@@ -150,11 +150,15 @@ class HeadlineTests(unittest.TestCase):
         needs = {"dependencies": {"result": "failure", "outputs": {"vulnerable": json.dumps([{}, {}]), "licences": "[]"}}}
         self.assertEqual(report.dependency_headline(needs), "2 vulnerable packages, 0 licence problems")
 
-    def test_test_headline_blames_the_template_when_tests_and_coverage_pass(self):
+    def test_test_headline_blames_the_template_only_when_the_tests_passed(self):
         tests = report.TestResults(passed=3)
         coverage = report.Coverage(100, 10, 10)
-        self.assertIn("generated template failed", report.test_headline("failure", tests, coverage, 95))
+        self.assertIn("generated template failed", report.test_headline("failure", tests, coverage, 95, "passed"))
+        self.assertNotIn("template", report.test_headline("failure", tests, coverage, 95, "failed"))
         self.assertIn("template installs", report.test_headline("success", tests, coverage, 95))
+
+    def test_dependency_headline_when_skipped(self):
+        self.assertEqual(report.dependency_headline({"dependencies": {"result": "skipped"}}), "didn't run")
 
 
 class CommandTests(unittest.TestCase):
@@ -166,7 +170,10 @@ class CommandTests(unittest.TestCase):
             write_results(directory, exit_code="0", coverage=COVERAGE)
             self.assertEqual(report.command_test(directory), 1)
             write_results(directory, exit_code="0", coverage=full)
-            self.assertEqual(report.command_test(directory), 0)
+            with mock.patch.dict(os.environ, {"GITHUB_OUTPUT": os.path.join(directory, "output")}):
+                self.assertEqual(report.command_test(directory), 0)
+            with open(os.path.join(directory, "output"), encoding="utf-8") as handle:
+                self.assertEqual(handle.read(), "tests=passed\n")
             with mock.patch.dict(os.environ, {"COVERAGE_THRESHOLD": "70"}):
                 write_results(directory, exit_code="0", coverage=COVERAGE)
                 self.assertEqual(report.command_test(directory), 0)
