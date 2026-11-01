@@ -128,14 +128,14 @@ class VerdictTests(unittest.TestCase):
         stages = [report.Stage("Build", "success", "version `1.0`", "https://example.com/job")]
         text = report.render_summary(stages, True, "https://example.com/run", "abcdef1234")
         self.assertTrue(text.startswith(report.MARKER))
-        self.assertIn("| [Build](https://example.com/job) | 🟢 Passed | version `1.0` |", text)
+        self.assertIn("| [Build](https://example.com/job) | 🟢 Passed | Version `1.0` |", text)
         self.assertIn("Commit `abcdef1`", text)
 
 
 class HeadlineTests(unittest.TestCase):
     def test_build_headline_shows_version_and_size(self):
         needs = {"build": {"result": "success", "outputs": {"version": "2026.11.01.5", "package_size": "165426"}}}
-        self.assertEqual(report.build_headline(needs), "version `2026.11.01.5`, template package 162 KB")
+        self.assertEqual(report.build_headline(needs), "version `2026.11.01.5` · template package 162 KB")
 
     def test_alerts_are_counted_by_severity(self):
         alerts = [
@@ -144,19 +144,31 @@ class HeadlineTests(unittest.TestCase):
             {"rule": {"severity": "warning"}},
         ]
         self.assertEqual(report.alerts_headline(alerts, "CodeQL"), "3 open CodeQL alerts: 2 high, 1 warning")
+        self.assertEqual(report.alerts_headline(alerts, "CodeQL", passed=True), "3 open CodeQL alerts, none blocking: 2 high, 1 warning")
         self.assertEqual(report.alerts_headline([], "Trivy"), "no open Trivy alerts")
         self.assertIn("couldn't be read", report.alerts_headline(None, "Trivy"))
 
     def test_dependency_headline_counts_outputs(self):
         needs = {"dependencies": {"result": "failure", "outputs": {"vulnerable": json.dumps([{}, {}]), "licences": "[]"}}}
-        self.assertEqual(report.dependency_headline(needs), "2 vulnerable packages, 0 licence problems")
+        self.assertEqual(report.dependency_headline(needs), "2 vulnerable packages · 0 licence problems")
 
     def test_test_headline_blames_the_template_only_when_the_tests_passed(self):
         tests = report.TestResults(passed=3)
-        coverage = report.Coverage(100, 10, 10)
-        self.assertIn("generated template failed", report.test_headline("failure", tests, coverage, 95, "passed"))
-        self.assertNotIn("template", report.test_headline("failure", tests, coverage, 95, "failed"))
-        self.assertIn("template installs", report.test_headline("success", tests, coverage, 95))
+        self.assertIn("generated template failed", report.test_headline("failure", tests, "passed"))
+        self.assertNotIn("template", report.test_headline("failure", tests, "failed"))
+        self.assertIn("template installs", report.test_headline("success", tests))
+
+    def test_coverage_row_has_its_own_result(self):
+        low, full = report.Coverage(75, 3, 4), report.Coverage(100, 10, 10)
+        self.assertEqual(report.coverage_result("failure", full, 95), "success")
+        self.assertEqual(report.coverage_result("failure", low, 95), "failure")
+        self.assertEqual(report.coverage_result("failure", None, 95), "failure")
+        self.assertEqual(report.coverage_result("cancelled", None, 95), "cancelled")
+        self.assertEqual(report.coverage_headline(low, 95), "75% (3 of 4 lines) · needs 95%")
+
+    def test_details_start_with_a_capital(self):
+        stage = report.Stage("Static Analysis", "success", "no open CodeQL alerts")
+        self.assertIn("| No open CodeQL alerts |", report.render_summary([stage], True, "https://run", "abc1234"))
 
     def test_dependency_headline_when_skipped(self):
         self.assertEqual(report.dependency_headline({"dependencies": {"result": "skipped"}}), "didn't run")
@@ -234,7 +246,8 @@ class CommandTests(unittest.TestCase):
         number, body = posted[0]
         self.assertEqual(number, "7")
         self.assertIn("Blocked by Test", body)
-        self.assertIn("2 passed, 1 failed, 1 skipped", body)
+        self.assertIn("2 passed · 1 failed · 1 skipped", body)
+        self.assertIn("**Blocked by Test** (and 4 more): 1 test failed.", body)
         self.assertIn("| [Build](https://example.com/build) | 🟢 Passed |", body)
 
     def test_summary_command_passes_on_main_without_dependency_review(self):

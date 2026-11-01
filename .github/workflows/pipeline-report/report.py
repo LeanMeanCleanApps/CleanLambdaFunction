@@ -178,6 +178,7 @@ class Stage:
     result: str  # success, failure, cancelled, skipped, or "n/a" when the stage doesn't apply
     headline: str
     link: str = ""
+    reason: str = ""  # what the verdict line says when this stage fails; the headline if empty
 
     @property
     def blocks(self) -> bool:
@@ -198,7 +199,7 @@ def verdict(stages: list[Stage], pull_request: bool) -> str:
     if not blockers:
         return "✅ **Ready to merge.** Every stage passed." if pull_request else "✅ **Pipeline passed.** Every stage passed."
     first = blockers[0]
-    reason = first.headline if first.result == "failure" else f"the stage was {first.result}"
+    reason = (first.reason or first.headline) if first.result == "failure" else f"the stage was {first.result}"
     more = f" (and {len(blockers) - 1} more)" if len(blockers) > 1 else ""
     return f"❌ **Blocked by {first.name}**{more}: {reason}."
 
@@ -215,10 +216,18 @@ def render_summary(stages: list[Stage], pull_request: bool, run_url: str, sha: s
     ]
     for stage in stages:
         name = f"[{stage.name}]({stage.link})" if stage.link else stage.name
-        out.append(f"| {name} | {ICONS.get(stage.result, stage.result)} | {cell(stage.headline)} |")
+        out.append(f"| {name} | {ICONS.get(stage.result, stage.result)} | {cell(capitalise(stage.headline))} |")
     short = sha[:7] if sha else "unknown"
     out += ["", f"<sub>Commit `{short}` · [Full run]({run_url})</sub>"]
     return "\n".join(out) + "\n"
+
+
+def capitalise(text: str) -> str:
+    """Details start with a capital or a number; the verdict line keeps them lower case mid-sentence."""
+    return text[:1].upper() + text[1:]
+
+
+SEPARATOR = " · "
 
 
 def stage_result(needs: dict, key: str) -> str:
@@ -236,23 +245,33 @@ def build_headline(needs: dict) -> str:
         parts.append(f"template package {int(size) / 1024:.0f} KB")
     if stage_result(needs, "build") == "failure":
         return "the build, format check or template pack failed"
-    return ", ".join(parts) or "built"
+    return SEPARATOR.join(parts) or "built"
 
 
-def test_headline(result: str, tests: TestResults | None, coverage: Coverage | None, threshold: float, tests_outcome: str = "") -> str:
+def test_headline(result: str, tests: TestResults | None, tests_outcome: str = "") -> str:
     parts = []
     if tests is not None:
-        parts.append(f"{tests.passed} passed, {tests.failed} failed, {tests.skipped} skipped")
-    if coverage is not None:
-        parts.append(f"line coverage {format_percent(coverage.percent)} (needs {format_percent(threshold)})")
+        parts.append(f"{tests.passed} passed{SEPARATOR}{tests.failed} failed{SEPARATOR}{tests.skipped} skipped")
     if result == "success":
         parts.append("template installs, builds and passes its tests")
     elif result == "failure" and tests_outcome == "passed":
-        parts.append("but the generated template failed to build or test")
-    return ", ".join(parts) or "no test results"
+        parts.append("the generated template failed to build or test")
+    return SEPARATOR.join(parts) or "no test results"
 
 
-def alerts_headline(alerts: list[dict] | None, what: str) -> str:
+def coverage_result(test_result: str, coverage: Coverage | None, threshold: float) -> str:
+    if coverage is None:
+        return "failure" if test_result in ("success", "failure") else test_result
+    return "success" if coverage.percent >= threshold else "failure"
+
+
+def coverage_headline(coverage: Coverage | None, threshold: float) -> str:
+    if coverage is None:
+        return "no coverage report"
+    return f"{format_percent(coverage.percent)} ({coverage.covered} of {coverage.total} lines){SEPARATOR}needs {format_percent(threshold)}"
+
+
+def alerts_headline(alerts: list[dict] | None, what: str, passed: bool = False) -> str:
     if alerts is None:
         return f"{what} ran; open alerts couldn't be read"
     if not alerts:
@@ -264,7 +283,8 @@ def alerts_headline(alerts: list[dict] | None, what: str) -> str:
         counts[level] = counts.get(level, 0) + 1
     order = ["critical", "high", "medium", "low", "error", "warning", "note", "unknown"]
     text = ", ".join(f"{counts[k]} {k}" for k in order if k in counts)
-    return f"{len(alerts)} open {what} alert{'s' if len(alerts) != 1 else ''}: {text}"
+    blocking = ", none blocking" if passed else ""
+    return f"{len(alerts)} open {what} alert{'s' if len(alerts) != 1 else ''}{blocking}: {text}"
 
 
 def dependency_headline(needs: dict) -> str:
@@ -275,7 +295,7 @@ def dependency_headline(needs: dict) -> str:
     licences = count_json(outputs.get("licences"))
     if vulnerable is None and licences is None:
         return "no dependency changes to review" if stage_result(needs, "dependencies") == "success" else "review failed"
-    return f"{vulnerable or 0} vulnerable package{'s' if vulnerable != 1 else ''}, {licences or 0} licence problem{'s' if licences != 1 else ''}"
+    return f"{vulnerable or 0} vulnerable package{'s' if vulnerable != 1 else ''}{SEPARATOR}{licences or 0} licence problem{'s' if licences != 1 else ''}"
 
 
 def count_ignored(path: str) -> int:
@@ -459,15 +479,24 @@ def command_summary(results: str) -> int:
     trivy = safely("read Trivy alerts", lambda: github.alerts("Trivy", ref)) if scan == "success" or scan == "failure" else []
     ignored = count_ignored(".trivyignore")
 
+    test = stage_result(needs, "test")
     stages = [
         Stage("Build", stage_result(needs, "build"), build_headline(needs), job_link("Build")),
         Stage(
             "Test",
-            stage_result(needs, "test"),
-            test_headline(stage_result(needs, "test"), tests, coverage, threshold(), needs.get("test", {}).get("outputs", {}).get("tests", "")),
+            test,
+            test_headline(test, tests, needs.get("test", {}).get("outputs", {}).get("tests", "")),
             job_link("Test"),
+            f"{tests.failed} test{'s' if tests.failed != 1 else ''} failed" if tests and tests.failed else "",
         ),
-        Stage("Static Analysis", analysis, alerts_headline(codeql, "CodeQL") if analysis in ("success", "failure") else "didn't run", security + urllib.parse.quote(" tool:CodeQL")),
+        Stage(
+            "Coverage",
+            coverage_result(test, coverage, threshold()),
+            coverage_headline(coverage, threshold()) if coverage or test in ("success", "failure") else "didn't run",
+            job_link("Test"),
+            f"line coverage {format_percent(coverage.percent)} is below {format_percent(threshold())}" if coverage else "",
+        ),
+        Stage("Static Analysis", analysis, alerts_headline(codeql, "CodeQL", analysis == "success") if analysis in ("success", "failure") else "didn't run", security + urllib.parse.quote(" tool:CodeQL")),
         Stage(
             "Dependency Review",
             stage_result(needs, "dependencies") if pull_request else "n/a",
@@ -477,7 +506,7 @@ def command_summary(results: str) -> int:
         Stage(
             "Container Scan",
             scan,
-            (alerts_headline(trivy, "Trivy") + (f", {ignored} ignored in .trivyignore" if ignored else "")) if scan in ("success", "failure") else "didn't run",
+            (alerts_headline(trivy, "Trivy", scan == "success") + (f"{SEPARATOR}{ignored} ignored in .trivyignore" if ignored else "")) if scan in ("success", "failure") else "didn't run",
             security + urllib.parse.quote(" tool:Trivy"),
         ),
     ]
