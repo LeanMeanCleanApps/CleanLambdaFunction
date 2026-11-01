@@ -1,7 +1,6 @@
 [![Clean Lambda Function](https://raw.githubusercontent.com/LeanMeanCleanApps/brand/main/assets/banners/png/lambda.png)](https://leanmeancleanapps.github.io/lambda/)
 
 [![Build Pipeline](https://img.shields.io/github/actions/workflow/status/LeanMeanCleanApps/CleanLambdaFunction/build-pipeline.yml?branch=main&label=Build%20Pipeline&logo=github&style=for-the-badge)](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/actions/workflows/build-pipeline.yml)
-[![Code Coverage](https://img.shields.io/codecov/c/github/LeanMeanCleanApps/CleanLambdaFunction?label=Code%20Coverage&logo=codecov&logoColor=white&style=for-the-badge)](https://codecov.io/gh/LeanMeanCleanApps/CleanLambdaFunction)
 [![NuGet](https://img.shields.io/nuget/v/CleanLambdaFunction.Template?label=NuGet&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanLambdaFunction.Template)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/CleanLambdaFunction.Template?label=Downloads&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanLambdaFunction.Template)
 [![License](https://img.shields.io/github/license/LeanMeanCleanApps/CleanLambdaFunction?label=License&style=for-the-badge)](LICENSE.md)
@@ -108,14 +107,14 @@ And around the edges:
 - **Tests** use [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet). Each test gets its own throwaway in-memory database, so no test can spoil another one's data.
 - **Sample data** comes from [Bogus](https://github.com/bchavez/Bogus), and only when `Database:SeedSampleData` is on. A deployed function never starts with fake reviews.
 - **Build rules** live in `Directory.Build.props`. Code style and the recommended analyzers run on every build, warnings fail it, and package versions sit in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management).
-- **The pipeline** builds, tests, checks formatting, demands 95% coverage and 90% of every pull request's new lines, scans the container with [Trivy](https://trivy.dev) and runs [CodeQL](https://codeql.github.com). Trust is earned.
+- **The pipeline** builds, checks formatting, tests with a 95% coverage bar, makes sure the packed template still works, runs [CodeQL](https://codeql.github.com), reviews new dependencies and their licences, and scans the container and Dockerfile with [Trivy](https://trivy.dev). Then it sums the lot up in one comment on your pull request, so you know exactly who to blame. It needs no accounts, tokens or secrets, so your copy works the moment you push it. Trust is earned.
 - **Dependabot** bundles the month's dependency updates into one pull request on the 15th.
 
 The [architecture page](https://leanmeancleanapps.github.io/lambda/explanation/architecture/) has the long version, with full credit to [Jason Taylor's template](https://github.com/jasontaylordev/CleanArchitecture) and [Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) for the ideas.
 
 ## Releases
 
-A new version lands on the 1st of each month, as long as something changed, with notes for every pull request in the [GitHub release](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/releases). No changes, no release. We're not here to pad the download stats.
+A new version lands on the 1st of each month, as long as something changed, with notes for every pull request in the [GitHub release](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/releases). No changes, no release. We're not here to pad the download stats. Each release also carries an SPDX bill of materials listing every package the function ships with, for anyone whose security team asks nicely (or not so nicely).
 
 ```bash
 dotnet new update

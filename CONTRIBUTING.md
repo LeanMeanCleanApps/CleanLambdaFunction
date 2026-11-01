@@ -52,7 +52,7 @@ dotnet new uninstall ./
 
 1. Create a branch from `main` named `feature/`, `fix/` or `chore/` followed by a short description, for example `fix/review-validation`.
 1. Keep the change focused. Unrelated refactors are easier to review as separate pull requests.
-1. Add or update tests. The pipeline fails if line coverage drops below 95%, or if less than 90% of the lines your pull request changes are covered. It doesn't negotiate, and neither does the maintainer.
+1. Add or update tests. The pipeline fails if line coverage drops below 95%. It doesn't negotiate, and neither does the maintainer.
 1. Follow the style in `.editorconfig` and `Directory.Build.props`. Warnings are treated as errors, so the build must be clean. A warning is just an error that hasn't been caught yet.
 1. Update the README or docs if behaviour changes.
 
@@ -60,7 +60,7 @@ dotnet new uninstall ./
 
 1. Open the pull request against `main` and fill in the template.
 1. Link the issue it resolves, for example `Closes #123`.
-1. Every check must pass: Build and Test, Code Coverage, Container Scan and Static Analysis.
+1. Every check must pass: Build, Test, Static Analysis, Dependency Review, Container Scan and Summary. The Summary comment on your pull request says which one is unhappy and links to the details.
 1. The maintainer reviews every pull request and squash-merges it once it's green. That's not a lack of trust, it's just how the lights stay on. If a review takes a while, a polite nudge is fine.
 
 ## Getting help

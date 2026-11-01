@@ -35,11 +35,21 @@ COPY . .
 RUN dotnet build --no-restore -c Release -v minimal -p:VersionPrefix=${VERSION_PREFIX} -p:VersionSuffix=${VERSION_SUFFIX}
 
 # Dotnet Test
+# The exit code is saved rather than failing the build, so the results can still be exported
+# and reported. Coverlet merges every test project's coverage into one report, and the pipeline
+# checks that report against the threshold. A per-project Coverlet threshold can't be used here,
+# because it would judge each project on a partly merged report.
 FROM build AS test
-RUN dotnet test --no-restore --no-build -c Release -v minimal -p:CollectCoverage=true  -p:CoverletOutput=../results/ -p:MergeWith="../results/coverage.json" -p:CoverletOutputFormat=opencover%2cjson -m:1 -p:ExcludeByFile="**/Migrations/*.cs%2c**/obj/**/*.cs" -p:ExcludeByAttribute="GeneratedCodeAttribute"
+RUN mkdir -p /sln/tests/results; \
+    dotnet test --no-restore --no-build -c Release -v minimal -m:1 \
+      --logger "trx;LogFilePrefix=tests" --results-directory /sln/tests/results \
+      -p:CollectCoverage=true -p:CoverletOutput=../results/ -p:MergeWith="../results/coverage.json" \
+      -p:CoverletOutputFormat=opencover%2cjson -p:ExcludeByFile="**/Migrations/*.cs%2c**/obj/**/*.cs" \
+      -p:ExcludeByAttribute="GeneratedCodeAttribute"; \
+    echo $? > /sln/tests/results/exit-code
 
-FROM scratch AS coverage
-COPY --from=test /sln/tests/results/*.xml .
+FROM scratch AS results
+COPY --from=test /sln/tests/results/ ./
 
 # Dotnet Publish
 FROM build AS publish
@@ -56,4 +66,8 @@ RUN dnf upgrade -y --releasever=latest && dnf clean all
 
 WORKDIR /var/task
 COPY --from=publish /sln/app .
+
+# Run as nobody, not root. AWS Lambda already does this in the cloud; this makes the local
+# emulator behave the same and keeps the container scan happy. A numeric id needs no passwd entry.
+USER 65534:65534
 CMD [ "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler::GetMovies" ]
