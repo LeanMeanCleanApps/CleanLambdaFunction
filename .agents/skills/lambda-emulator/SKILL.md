@@ -1,0 +1,48 @@
+---
+name: lambda-emulator
+description: How to try the function by hand with the Lambda runtime interface emulator in the AWS base image - docker compose, invoking with curl, choosing another function, and reading errors. Use when you want to call the function as Lambda would, without deploying it.
+metadata:
+  scope: presentation
+---
+
+# Lambda runtime interface emulator
+
+## The rule
+
+The runtime image is built on the AWS Lambda .NET base image, which includes the runtime interface emulator. Running the image locally gives an endpoint that invokes the function exactly as Lambda would. `docker-compose.yml` maps it to port 9000 and turns sample data on. The image runs `GetMovies` unless you name another handler.
+
+## Steps
+
+1. Start it: `docker compose up -d --build`.
+2. Invoke it by posting the request JSON to the emulator:
+
+   ```bash
+   curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+     -d '{ "query": "global", "offset": 0, "limit": 5 }'
+   ```
+
+3. To try another function, run the image with its handler string as the command:
+
+   ```bash
+   docker build . --target run --tag cleanlambdafunction:local
+   docker run --rm -p 9000:8080 -e Database__SeedSampleData=true cleanlambdafunction:local \
+     "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler::GetAuthors"
+   ```
+
+4. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`.
+5. Read the container's output with `docker compose logs function` for the runtime's start, invoke and error lines.
+6. Stop it with `docker compose down`.
+
+## Don't
+
+- Use the emulator in place of tests. Anything you check by hand gets a test (`presentation-integration-tests`).
+- Expose port 9000 beyond your machine. The emulator has no authentication.
+- Deploy to try a change. The emulator runs the same image Lambda would.
+
+## Check
+
+``` bash
+docker compose up -d --build
+curl -fsS -X POST http://localhost:9000/2015-03-31/functions/function/invocations -d '{}'
+docker compose down
+```

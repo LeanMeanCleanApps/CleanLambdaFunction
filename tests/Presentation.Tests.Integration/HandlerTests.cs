@@ -4,6 +4,7 @@ using Amazon.Lambda.TestUtilities;
 using CleanLambdaFunction.Presentation.LambdaFunction;
 using CleanLambdaFunction.Presentation.LambdaFunction.Models;
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 using Xunit;
 
@@ -61,8 +62,8 @@ public class HandlerTests
     public async Task Handler_ShouldRead_SettingsFromEnvironment()
     {
         // Arrange
-        Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared");
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, "true");
+        Environment.SetEnvironmentVariable("ConnectionStrings__MovieReviews", $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared");
+        Environment.SetEnvironmentVariable("Database__SeedSampleData", "true");
 
         try
         {
@@ -74,47 +75,79 @@ public class HandlerTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, null);
-            Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
+            Environment.SetEnvironmentVariable("ConnectionStrings__MovieReviews", null);
+            Environment.SetEnvironmentVariable("Database__SeedSampleData", null);
         }
     }
 
     [Fact]
-    public void Handler_ShouldUse_DefaultsWhenEnvironmentIsUnset()
+    public async Task Handler_ShouldRead_SettingsFromConfiguration()
     {
         // Arrange
-        Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, null);
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
+        var configuration = Configuration(new()
+        {
+            ["ConnectionStrings:MovieReviews"] = $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared",
+            ["Database:SeedSampleData"] = "true"
+        });
 
         // Act
-        var connectionString = Handler.ConnectionStringFromEnvironment();
-        var seedSampleData = Handler.SeedSampleDataFromEnvironment();
+        var result = await new Handler(configuration).GetMovies(new ListRequest(), this.context);
+
+        // Assert
+        result.TotalCount.ShouldBe(50);
+    }
+
+    [Fact]
+    public async Task Handler_ShouldNotSeed_WhenSettingIsMissing()
+    {
+        // Arrange
+        var configuration = Configuration(new()
+        {
+            ["ConnectionStrings:MovieReviews"] = $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared"
+        });
+
+        // Act
+        var result = await new Handler(configuration).GetMovies(new ListRequest(), this.context);
+
+        // Assert
+        result.TotalCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Handler_ShouldThrow_WhenSeedSettingIsNotABoolean()
+    {
+        // Arrange
+        var configuration = Configuration(new()
+        {
+            ["ConnectionStrings:MovieReviews"] = $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared",
+            ["Database:SeedSampleData"] = "yes"
+        });
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => new Handler(configuration));
+
+        // Assert
+        exception.Message.ShouldContain("Database:SeedSampleData");
+    }
+
+    [Fact]
+    public void ConnectionStringFrom_ShouldReturn_DefaultWhenUnset()
+    {
+        // Act
+        var connectionString = Handler.ConnectionStringFrom(Configuration([]));
 
         // Assert
         connectionString.ShouldBe(Handler.DefaultConnectionString);
-        seedSampleData.ShouldBeFalse();
     }
 
-    [Theory]
-    [InlineData("false")]
-    [InlineData("yes")]
-    public void Handler_ShouldNotSeed_UnlessEnvironmentSaysTrue(string value)
+    [Fact]
+    public void ConnectionStringFrom_ShouldThrow_WhenConfigurationIsNull()
     {
-        // Arrange
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, value);
+        // Act
+        var exception = Should.Throw<ArgumentNullException>(() => Handler.ConnectionStringFrom(null!));
 
-        try
-        {
-            // Act
-            var seedSampleData = Handler.SeedSampleDataFromEnvironment();
-
-            // Assert
-            seedSampleData.ShouldBeFalse();
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
-        }
+        // Assert
+        exception.ParamName.ShouldBe("configuration");
     }
 
     [Fact]
@@ -238,5 +271,10 @@ public class HandlerTests
 
         // Assert
         exception.Errors.ShouldContain(e => e.PropertyName == "MovieId");
+    }
+
+    private static IConfiguration Configuration(Dictionary<string, string?> settings)
+    {
+        return new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
     }
 }

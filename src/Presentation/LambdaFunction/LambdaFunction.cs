@@ -10,32 +10,48 @@ using Application.Reviews.Queries.GetReviews;
 using Infrastructure;
 using Mapping;
 using Mediator;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
 using AppPaging = Application.Common.Paging;
 
+/// <summary>
+/// The Lambda functions. Lambda creates one handler per execution environment and reuses it for every invocation,
+/// so the services and the database are set up once, when the environment starts.
+/// </summary>
 public class Handler
 {
     /// <summary>
-    /// Lambda can only write to /tmp, so the SQLite database lives there unless the environment variable says otherwise.
+    /// Lambda can only write to /tmp, so the SQLite database lives there unless the settings say otherwise.
     /// </summary>
     public const string DefaultConnectionString = "Data Source=/tmp/movie-reviews.db";
-
-    public const string ConnectionStringVariable = "ConnectionStrings__MovieReviews";
-
-    /// <summary>
-    /// Set it to true to seed sample data into an empty database. Leave it unset anywhere real data lives.
-    /// </summary>
-    public const string SeedSampleDataVariable = "Database__SeedSampleData";
 
     private readonly ServiceProvider provider;
     private readonly LambdaFunctionMapper mapper = new();
 
+    /// <summary>
+    /// Creates the handler Lambda uses, with settings from environment variables such as
+    /// <c>ConnectionStrings__MovieReviews</c> and <c>Database__SeedSampleData</c>.
+    /// </summary>
     public Handler()
-        : this(ConnectionStringFromEnvironment(), SeedSampleDataFromEnvironment())
+        : this(new ConfigurationBuilder().AddEnvironmentVariables().Build())
     {
     }
 
+    /// <summary>
+    /// Creates a handler from configuration, using the same keys as the other templates.
+    /// </summary>
+    /// <param name="configuration">The settings, read from <c>ConnectionStrings:MovieReviews</c> and <c>Database:SeedSampleData</c>.</param>
+    public Handler(IConfiguration configuration)
+        : this(ConnectionStringFrom(configuration), configuration.GetValue<bool>("Database:SeedSampleData"))
+    {
+    }
+
+    /// <summary>
+    /// Creates a handler for a database, seeding sample data into it when it's empty and asked to.
+    /// </summary>
+    /// <param name="connectionString">The SQLite connection string.</param>
+    /// <param name="seedSampleData">True to seed sample data into an empty database.</param>
     public Handler(string connectionString, bool seedSampleData)
     {
         var services = new ServiceCollection();
@@ -105,21 +121,15 @@ public class Handler
     }
 
     /// <summary>
-    /// The connection string from the environment, or the default in /tmp when it isn't set.
+    /// The connection string from configuration, or the default in /tmp when it isn't set.
     /// </summary>
+    /// <param name="configuration">The settings to read <c>ConnectionStrings:MovieReviews</c> from.</param>
     /// <returns>The connection string the handler uses.</returns>
-    public static string ConnectionStringFromEnvironment()
+    public static string ConnectionStringFrom(IConfiguration configuration)
     {
-        return Environment.GetEnvironmentVariable(ConnectionStringVariable) ?? DefaultConnectionString;
-    }
+        ArgumentNullException.ThrowIfNull(configuration);
 
-    /// <summary>
-    /// Whether the environment asks for sample data. Anything other than true, including no value, means no.
-    /// </summary>
-    /// <returns>True when sample data should be seeded into an empty database.</returns>
-    public static bool SeedSampleDataFromEnvironment()
-    {
-        return bool.TryParse(Environment.GetEnvironmentVariable(SeedSampleDataVariable), out var seedSampleData) && seedSampleData;
+        return configuration.GetConnectionString("MovieReviews") ?? DefaultConnectionString;
     }
 
     private static Page<TResult> ToPage<T, TResult>(AppPaging.Page<T> page, Func<T, TResult> map)
