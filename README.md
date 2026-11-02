@@ -124,10 +124,10 @@ dotnet new update
 
 | Template | Presentation |
 | --- | --- |
-| [Clean Minimal API](https://github.com/stphnwlsh/CleanMinimalApi) | ASP.NET Core Minimal APIs |
-| [Clean Model Context Protocol](https://github.com/stphnwlsh/CleanModelContextProtocol) | Model Context Protocol server |
-| [Clean GraphQL API](https://github.com/stphnwlsh/CleanGraphQLApi) | GraphQL with Hot Chocolate |
-| [Clean Web API](https://github.com/stphnwlsh/CleanWebApi) | ASP.NET Core controllers |
+| [Clean Minimal API](https://github.com/LeanMeanCleanApps/CleanMinimalApi) | ASP.NET Core Minimal APIs |
+| [Clean Model Context Protocol](https://github.com/LeanMeanCleanApps/CleanModelContextProtocol) | Model Context Protocol server |
+| [Clean GraphQL API](https://github.com/LeanMeanCleanApps/CleanGraphQLApi) | GraphQL with Hot Chocolate |
+| [Clean Web API](https://github.com/LeanMeanCleanApps/CleanWebApi) | ASP.NET Core controllers |
 | **Clean Lambda Function** | AWS Lambda, you are here |
 
 ## Contributing

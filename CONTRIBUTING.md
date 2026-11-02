@@ -15,10 +15,10 @@ This is a [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) project, 
 
 This repository is one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates that share everything except the Presentation layer:
 
-- [Clean Minimal API](https://github.com/stphnwlsh/CleanMinimalApi)
-- [Clean Model Context Protocol](https://github.com/stphnwlsh/CleanModelContextProtocol)
-- [Clean GraphQL API](https://github.com/stphnwlsh/CleanGraphQLApi)
-- [Clean Web API](https://github.com/stphnwlsh/CleanWebApi)
+- [Clean Minimal API](https://github.com/LeanMeanCleanApps/CleanMinimalApi)
+- [Clean Model Context Protocol](https://github.com/LeanMeanCleanApps/CleanModelContextProtocol)
+- [Clean GraphQL API](https://github.com/LeanMeanCleanApps/CleanGraphQLApi)
+- [Clean Web API](https://github.com/LeanMeanCleanApps/CleanWebApi)
 - [Clean Lambda Function](https://github.com/LeanMeanCleanApps/CleanLambdaFunction)
 
 If your change touches the Application or Infrastructure layers, their tests, the build pipeline or the repository setup, it needs to be made in all five. Mention that in your pull request and the maintainer will carry it across. You fix it once, the family gets it five times.
