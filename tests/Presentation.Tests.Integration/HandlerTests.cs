@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog.Extensions.Logging;
 using Shouldly;
 using Xunit;
 
@@ -152,6 +154,36 @@ public class HandlerTests
 
         // Assert
         connectionString.ShouldBe(Startup.DefaultConnectionString);
+    }
+
+    [Fact]
+    public void Startup_ShouldLog_InformationWithSerilog()
+    {
+        // Arrange
+        using var provider = new Startup().ConfigureHostBuilder().Services.BuildServiceProvider();
+
+        // Act
+        var factory = provider.GetRequiredService<ILoggerFactory>();
+        var logger = provider.GetRequiredService<ILogger<HandlerTests>>();
+
+        // Assert
+        _ = factory.ShouldBeOfType<SerilogLoggerFactory>();
+        logger.IsEnabled(LogLevel.Information).ShouldBeTrue();
+        logger.IsEnabled(LogLevel.Debug).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Startup_ShouldRead_LogLevel_FromSettings()
+    {
+        // Arrange
+        using var provider = new Startup([new("Serilog:MinimumLevel:Default", "Warning")]).ConfigureHostBuilder().Services.BuildServiceProvider();
+
+        // Act
+        var logger = provider.GetRequiredService<ILogger<HandlerTests>>();
+
+        // Assert
+        logger.IsEnabled(LogLevel.Information).ShouldBeFalse();
+        logger.IsEnabled(LogLevel.Warning).ShouldBeTrue();
     }
 
     [Fact]
