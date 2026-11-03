@@ -3,10 +3,12 @@
 namespace CleanLambdaFunction.Presentation.LambdaFunction;
 
 using Amazon.Lambda.Annotations;
+using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.Core;
 using Application.Authors.Queries.GetAuthors;
 using Application.Movies.Queries.GetMovies;
 using Application.Reviews.Queries.GetReviews;
+using FluentValidation;
 using Infrastructure;
 using Mapping;
 using Mediator;
@@ -97,6 +99,153 @@ public class Handler
 
         return ToPage(page, this.mapper.ToPresentation);
     }
+
+    #region HTTP API
+
+    /// <summary>
+    /// The same list as <see cref="GetMovies"/>, for API Gateway: <c>GET /movies?query=&amp;offset=&amp;limit=</c>.
+    /// </summary>
+    /// <param name="query">The words to look for in the title, ignoring case. Leave empty to list every movie.</param>
+    /// <param name="offset">The number of movies to skip.</param>
+    /// <param name="limit">The most movies to return, from 1 to 50.</param>
+    /// <param name="context">The Lambda invocation context.</param>
+    /// <returns><c>200</c> with one page of movies, or <c>400</c> with problem details when the request is invalid.</returns>
+    [LambdaFunction(ResourceName = "HttpGetMovies", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
+    [HttpApi(LambdaHttpMethod.Get, "/movies")]
+    public async Task<IHttpResult> HttpGetMovies(
+        [FromQuery] string query,
+        [FromQuery] int? offset,
+        [FromQuery] int? limit,
+        ILambdaContext context)
+    {
+        return await Http(() => this.GetMovies(new ListRequest
+        {
+            Query = EmptyAsNull(query),
+            Offset = offset ?? 0,
+            Limit = limit ?? AppPaging.Paging.DefaultLimit
+        }, context));
+    }
+
+    /// <summary>
+    /// The same list as <see cref="GetAuthors"/>, for API Gateway: <c>GET /authors?query=&amp;offset=&amp;limit=</c>.
+    /// </summary>
+    /// <param name="query">The words to look for in the author's name, ignoring case. Leave empty to list every author.</param>
+    /// <param name="offset">The number of authors to skip.</param>
+    /// <param name="limit">The most authors to return, from 1 to 50.</param>
+    /// <param name="context">The Lambda invocation context.</param>
+    /// <returns><c>200</c> with one page of authors, or <c>400</c> with problem details when the request is invalid.</returns>
+    [LambdaFunction(ResourceName = "HttpGetAuthors", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
+    [HttpApi(LambdaHttpMethod.Get, "/authors")]
+    public async Task<IHttpResult> HttpGetAuthors(
+        [FromQuery] string query,
+        [FromQuery] int? offset,
+        [FromQuery] int? limit,
+        ILambdaContext context)
+    {
+        return await Http(() => this.GetAuthors(new ListRequest
+        {
+            Query = EmptyAsNull(query),
+            Offset = offset ?? 0,
+            Limit = limit ?? AppPaging.Paging.DefaultLimit
+        }, context));
+    }
+
+    /// <summary>
+    /// The same list as <see cref="GetReviews"/>, for API Gateway: <c>GET /reviews?movieId=&amp;authorId=&amp;offset=&amp;limit=</c>.
+    /// </summary>
+    /// <param name="movieId">Only reviews of this movie. Leave empty for every movie.</param>
+    /// <param name="authorId">Only reviews by this author. Leave empty for every author.</param>
+    /// <param name="offset">The number of reviews to skip.</param>
+    /// <param name="limit">The most reviews to return, from 1 to 50.</param>
+    /// <param name="context">The Lambda invocation context.</param>
+    /// <returns>
+    /// <c>200</c> with one page of reviews, or <c>400</c> with problem details when an id isn't a GUID or the request is invalid.
+    /// </returns>
+    [LambdaFunction(ResourceName = "HttpGetReviews", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
+    [HttpApi(LambdaHttpMethod.Get, "/reviews")]
+    public async Task<IHttpResult> HttpGetReviews(
+        [FromQuery] string movieId,
+        [FromQuery] string authorId,
+        [FromQuery] int? offset,
+        [FromQuery] int? limit,
+        ILambdaContext context)
+    {
+        // The generator only binds primitive types from the query string, so the ids arrive as text.
+        var errors = new Dictionary<string, string[]>();
+        var movie = ParseId(movieId, nameof(movieId), errors);
+        var author = ParseId(authorId, nameof(authorId), errors);
+
+        if (errors.Count > 0)
+        {
+            return BadRequest(errors);
+        }
+
+        return await Http(() => this.GetReviews(new ListReviewsRequest
+        {
+            MovieId = movie,
+            AuthorId = author,
+            Offset = offset ?? 0,
+            Limit = limit ?? AppPaging.Paging.DefaultLimit
+        }, context));
+    }
+
+    /// <summary>
+    /// Turns the result into <c>200 OK</c>, and a validation failure into <c>400</c> problem details. Anything else is
+    /// left to fail the invocation, so Lambda logs it and API Gateway answers <c>500</c>. A function that can raise
+    /// <c>NotFoundException</c> adds a catch for it here that returns <c>404</c>.
+    /// </summary>
+    private static async Task<IHttpResult> Http<T>(Func<Task<T>> function)
+    {
+        try
+        {
+            return HttpResults.Ok(await function());
+        }
+        catch (ValidationException exception)
+        {
+            return BadRequest(exception.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).Distinct().ToArray()));
+        }
+    }
+
+    private static IHttpResult BadRequest(IDictionary<string, string[]> errors)
+    {
+        return ProblemResult(HttpResults.BadRequest(new Problem("One or more validation errors occurred.", StatusCodes.BadRequest, Errors: errors)));
+    }
+
+    private static Guid? ParseId(string value, string name, Dictionary<string, string[]> errors)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(value, out var id))
+        {
+            return id;
+        }
+
+        errors[name] = [$"'{value}' is not a valid id."];
+
+        return null;
+    }
+
+    private static string? EmptyAsNull(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private static IHttpResult ProblemResult(IHttpResult result)
+    {
+        return result.AddHeader("Content-Type", "application/problem+json");
+    }
+
+    private static class StatusCodes
+    {
+        public const int BadRequest = 400;
+    }
+
+    #endregion HTTP API
 
     private static Page<TResult> ToPage<T, TResult>(AppPaging.Page<T> page, Func<T, TResult> map)
     {

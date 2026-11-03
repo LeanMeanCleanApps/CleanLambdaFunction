@@ -37,6 +37,20 @@ curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
   -d '{ "query": "global", "offset": 0, "limit": 5 }'
 ```
 
+To try one of the HTTP API functions, run the image with its handler and post an API Gateway HTTP API (payload 2.0) event. The emulator doesn't pretend to be API Gateway, so you send the event it would have sent.
+
+```bash
+docker run --rm -p 9000:8080 \
+  -e Database__SeedSampleData=true \
+  cleanlambdafunction:local \
+  "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_HttpGetMovies_Generated::HttpGetMovies"
+
+curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+  -d '{ "version": "2.0", "routeKey": "GET /movies", "rawPath": "/movies", "queryStringParameters": { "query": "global", "limit": "5" }, "requestContext": { "http": { "method": "GET", "path": "/movies" } } }'
+```
+
+The answer is the response API Gateway turns back into HTTP: a `statusCode`, the headers, and the page as a JSON string in `body`.
+
 ## Docker Compose
 
 `docker-compose.yml` does the same build and run in one step.
@@ -59,7 +73,7 @@ dotnet test
 
 ## Deploying to AWS
 
-`src/Presentation/serverless.template` is a CloudFormation template with a Lambda function for each handler method, all running the same container image. Lambda Annotations writes each function into it when the project builds, so a new function appears there by itself. Add any other resources you need beside them.
+`src/Presentation/serverless.template` is a CloudFormation template with a Lambda function for each handler method, all running the same container image. Lambda Annotations writes each function into it when the project builds, so a new function appears there by itself. The three `Http*` functions also get a route on the stack's API Gateway HTTP API, and the stack's `ApiUrl` output is its address. Add any other resources you need beside them.
 
 `src/Presentation/aws-lambda-tools-defaults.json` holds the defaults for the [Amazon.Lambda.Tools](https://github.com/aws/aws-extensions-for-dotnet-cli) CLI. Fill in your profile, region and stack name, then deploy the stack. The CLI builds the image from the Dockerfile, pushes it to Amazon ECR and creates or updates every function in one go.
 

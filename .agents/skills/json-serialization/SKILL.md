@@ -22,7 +22,7 @@ Responses are trees: a list returns flat records, and a review holds a flat `Mov
 
 ## Steps
 
-1. Add every new request and response type to `LambdaFunctionJsonSerializerContext` with `[JsonSerializable(typeof(...))]`, including each `Page<T>` you return.
+1. Add every new request and response type to `LambdaFunctionJsonSerializerContext` with `[JsonSerializable(typeof(...))]`, including each `Page<T>` you return. The HTTP API functions also need `Problem`, `APIGatewayHttpApiV2ProxyRequest` and `APIGatewayHttpApiV2ProxyResponse`, which are already there.
 2. Change how JSON looks in the `LambdaFunctionJsonSerializer` constructor, not on single properties, and keep the request and response tests in `tests/Presentation.Tests.Unit/Serialization/LambdaFunctionJsonSerializerTests.cs` in step. The serializer's own options replace the context's, so `[JsonSourceGenerationOptions]` on the context has no effect.
 3. Add a serializer test for a new request type (it reads the JSON a caller sends) and for any response whose shape matters to callers.
 
