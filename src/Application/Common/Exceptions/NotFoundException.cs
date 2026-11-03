@@ -1,6 +1,5 @@
 namespace CleanLambdaFunction.Application.Common.Exceptions;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using Enums;
 

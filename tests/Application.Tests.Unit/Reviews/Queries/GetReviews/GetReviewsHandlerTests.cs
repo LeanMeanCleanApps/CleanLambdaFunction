@@ -1,7 +1,5 @@
 namespace CleanLambdaFunction.Application.Tests.Unit.Reviews.Queries.GetReviews;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Paging;
 using Application.Reviews;
 using Application.Reviews.Entities;
