@@ -30,7 +30,7 @@ The runtime image is built on the AWS Lambda .NET base image, which includes the
    ```
 
 4. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`.
-5. Read the container's output with `docker compose logs function` for the runtime's start, invoke and error lines.
+5. Read the container's output with `docker compose logs function`. The runtime's start, invoke and error lines sit between our compact JSON events, one per line, at `Debug` because compose sets `Serilog__MinimumLevel__Default` (`serilog`).
 6. Stop it with `docker compose down`.
 
 ## Don't
