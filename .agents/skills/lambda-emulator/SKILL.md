@@ -1,6 +1,6 @@
 ---
 name: lambda-emulator
-description: How to try the function by hand with the Lambda runtime interface emulator in the AWS base image - docker compose, invoking with curl, choosing another function, and reading errors. Use when you want to call the function as Lambda would, without deploying it.
+description: How to try the function by hand with the Lambda runtime interface emulator in the AWS base image - docker compose, invoking with curl, choosing another function, sending an API Gateway HTTP API event, and reading errors. Use when you want to call the function as Lambda would, without deploying it.
 metadata:
   scope: presentation
 ---
@@ -29,9 +29,18 @@ The runtime image is built on the AWS Lambda .NET base image, which includes the
      "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_GetAuthors_Generated::GetAuthors"
    ```
 
-4. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`.
-5. Read the container's output with `docker compose logs function`. The runtime's start, invoke and error lines sit between our compact JSON events, one per line, at `Debug` because compose sets `Serilog__MinimumLevel__Default` (`serilog`).
-6. Stop it with `docker compose down`.
+4. An HTTP API function (`HttpGetMovies`, `HttpGetAuthors`, `HttpGetReviews`) takes the API Gateway HTTP API payload 2.0 event, not the request record. Run it by its handler string as in step 3 and post the event API Gateway would send. The query string values are strings, as they are on the wire:
+
+   ```bash
+   curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+     -d '{ "version": "2.0", "routeKey": "GET /movies", "rawPath": "/movies", "queryStringParameters": { "query": "global", "limit": "5" }, "requestContext": { "http": { "method": "GET", "path": "/movies" } } }'
+   ```
+
+   The answer has `statusCode`, `headers` and the JSON `body` as a string. Header names come back in lower case.
+
+5. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`. An HTTP API function answers a `400` with `content-type: application/problem+json` instead, and `"limit": "0"` in the query string shows it.
+6. Read the container's output with `docker compose logs function`. The runtime's start, invoke and error lines sit between our compact JSON events, one per line, at `Debug` because compose sets `Serilog__MinimumLevel__Default` (`serilog`).
+7. Stop it with `docker compose down`.
 
 ## Don't
 

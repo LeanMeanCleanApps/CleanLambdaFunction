@@ -90,7 +90,9 @@ The database is a SQLite file in `/tmp`, the only place Lambda lets you write, a
 
 When you're ready for the real thing, fill in your profile, region and stack name in `src/Presentation/aws-lambda-tools-defaults.json` and [deploy it to AWS](https://leanmeancleanapps.github.io/lambda/guides/deploy-to-aws/). Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
-The function is invoked directly, so AWS IAM decides who gets to call it. Want bearer tokens over HTTP? Put it behind an API Gateway HTTP API with a JWT authorizer. Either way, the bouncer stands outside the door, not inside your code.
+The lists also come over HTTP. `HttpGetMovies`, `HttpGetAuthors` and `HttpGetReviews` sit behind an API Gateway HTTP API at `GET /movies`, `GET /authors` and `GET /reviews`, taking `query`, `offset` and `limit` (or `movieId` and `authorId`) from the query string. They answer `200` with the page, or `400` with problem details when the request doesn't add up. The deployed stack prints the URL as `ApiUrl`.
+
+Direct invocations are guarded by AWS IAM, and the HTTP routes are open until you say otherwise. Want bearer tokens? Add a JWT authorizer to the HTTP API. Either way, the bouncer stands outside the door, not inside your code.
 
 ## What's inside
 

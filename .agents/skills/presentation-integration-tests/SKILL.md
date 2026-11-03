@@ -1,6 +1,6 @@
 ---
 name: presentation-integration-tests
-description: How this Lambda function is tested end to end - calling Handler methods with a TestLambdaContext, services from Startup with a private in-memory database per test class, the generated handler classes, and asserting exceptions. Use when writing or fixing a test in tests/Presentation.Tests.Integration.
+description: How this Lambda function is tested end to end - calling Handler methods with a TestLambdaContext, services from Startup with a private in-memory database per test class, the generated handler classes, the HTTP API functions, and asserting exceptions. Use when writing or fixing a test in tests/Presentation.Tests.Integration.
 metadata:
   scope: presentation
 ---
@@ -14,6 +14,7 @@ metadata:
 | File | Tests |
 | --- | --- |
 | `HandlerTests.cs` | Every function's results, paging, search and filters, the validation failures, and how the handler reads its settings |
+| `HttpApiTests.cs` | The `Http*` functions: the `200` page, each `400` with its problem details and content type, and the generated classes binding an `APIGatewayHttpApiV2ProxyRequest` query string |
 
 The serializer is tested on its own in `tests/Presentation.Tests.Unit` (`unit-tests`, `json-serialization`).
 
@@ -30,8 +31,9 @@ There are two ways in, and tests use whichever the case needs:
 2. Call the function, then assert the result: counts, `NextOffset`, and that every item matches the filter.
 3. Failures: `await Should.ThrowAsync<ValidationException>(...)` and check the property name in the errors, or `NotFoundException` and its message.
 4. Find the rows you need through another function (list, then pick one), not by hard-coded ids. Sample data ids are random.
-5. A test that sets environment variables clears them in `finally`.
-6. Write one test per success and per failure the function can return (`test-design`).
+5. For an `Http*` function, turn the `IHttpResult` into the API Gateway response with `Read`, then read the body with `Body<T>`. Check the content type with `ContentType`, which reads the raw JSON: Lambda Annotations writes header names in lower case and the SDK's response type doesn't read them back.
+6. A test that sets environment variables clears them in `finally`.
+7. Write one test per success and per failure the function can return (`test-design`).
 
 ## Example
 

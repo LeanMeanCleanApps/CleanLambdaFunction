@@ -1,6 +1,5 @@
 namespace CleanLambdaFunction.Infrastructure.Databases.MovieReviews.Extensions;
 
-using System;
 using Bogus;
 using Models;
 

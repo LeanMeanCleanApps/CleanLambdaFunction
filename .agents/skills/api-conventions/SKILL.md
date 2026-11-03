@@ -1,6 +1,6 @@
 ---
 name: api-conventions
-description: The conventions for this Lambda function's contract - function names, one request record in and one response record out, offset paging with NextOffset, errors as Lambda function errors, and what is left to API Gateway or IAM. Use when naming a function, shaping its request or response, or deciding how a failure reaches the caller.
+description: The conventions for this Lambda function's contract - function names, one request record in and one response record out, offset paging with NextOffset, errors as Lambda function errors, the HTTP API routes and their problem details, and what is left to API Gateway or IAM. Use when naming a function, shaping its request or response, or deciding how a failure reaches the caller.
 metadata:
   scope: presentation
 ---
@@ -17,6 +17,7 @@ metadata:
 | Paging | `offset` and `limit` on the request (`paging`). `nextOffset` is the offset of the next page, or left out on the last page |
 | Search | A `query` property on the list request, not a separate function |
 | Errors | Application exceptions are not caught. Lambda returns them as a function error whose `errorType` is the exception name (`ValidationException`, `NotFoundException`) and whose `errorMessage` is its message |
+| HTTP | Lists that callers also want over HTTP get an `Http`-prefixed twin on an API Gateway HTTP API, the lower-cost API Gateway choice AWS recommends when REST API-only features aren't needed. `GET /movies`, `/authors` and `/reviews`, inputs from the query string, `200` with the same `Page<T>` JSON, `400` with `application/problem+json` (`title`, `status`, `errors` by property). Other failures fail the invocation and API Gateway answers `500` |
 | Auth | None in the function. API Gateway or the caller's IAM permissions decide who can invoke it (`optional-token-auth`) |
 | JSON | Property names read in any case, written in camelCase, nulls left out (`json-serialization`) |
 | Nested items | A review holds its movie and its author, each without counts or averages. Callers get those from `GetMovies` and `GetAuthors` |
@@ -32,6 +33,7 @@ Callers, such as Step Functions or another service, match on `errorType` to tell
 
 ## Don't
 
+- Put a write behind the HTTP API without deciding how it's protected. The routes are open until a JWT or IAM authorizer is added.
 - Return an error inside a successful response, or `null` for not found. Let the exception reach Lambda.
 - Wrap exceptions in a generic one. The exception name is part of the contract.
 - Return an unbounded list.

@@ -68,6 +68,134 @@
           ]
         }
       }
+    },
+    "HttpGetMovies": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../..",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_HttpGetMovies_Generated::HttpGetMovies"
+          ]
+        },
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/movies",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "HttpGetAuthors": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../..",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_HttpGetAuthors_Generated::HttpGetAuthors"
+          ]
+        },
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/authors",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "HttpGetReviews": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../..",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_HttpGetReviews_Generated::HttpGetReviews"
+          ]
+        },
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/reviews",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ApiUrl": {
+      "Description": "The base URL of the HTTP API, such as https://abc123.execute-api.us-east-1.amazonaws.com/movies",
+      "Value": {
+        "Fn::Sub": "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/"
+      }
     }
   }
 }

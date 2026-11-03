@@ -15,9 +15,16 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <AWSSuppressLambdaAnnotationsTelemetry>true</AWSSuppressLambdaAnnotationsTelemetry>
+
+    <!--
+      The classes Lambda Annotations generates for [HttpApi] functions point their XML docs at our method, whose
+      parameters they don't share, so the link can't resolve (CS1574). The generated code isn't ours to fix.
+    -->
+    <NoWarn>$(NoWarn);CS1574</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Annotations" />
+    <PackageReference Include="Amazon.Lambda.APIGatewayEvents" />
     <PackageReference Include="Amazon.Lambda.Core" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
     <PackageReference Include="Mediator.SourceGenerator">

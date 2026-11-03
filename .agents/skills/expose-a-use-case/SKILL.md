@@ -13,6 +13,8 @@ Every function is a public method on `Handler` (`src/Presentation/LambdaFunction
 
 The `Handler` constructor creates or upgrades the database once. Each method maps its request to the Application request, sends it through the private `Send` helper and maps the result to a presentation model. `Send` opens a DI scope per invocation and cancels the work when the invocation's remaining time runs out.
 
+A list that callers also want over HTTP gets a second method in the `#region HTTP API` block, named with an `Http` prefix (`HttpGetMovies`). It has `[HttpApi(LambdaHttpMethod.Get, "/movies")]` beside `[LambdaFunction]`, takes its inputs as `[FromQuery]` parameters and returns `IHttpResult`. It builds the same request record and calls the direct method through the `Http` helper, which answers `200` with the result and `400` problem details for a `ValidationException`. The build adds the route to the stack's API Gateway HTTP API in `serverless.template`.
+
 Functions contain no logic. Validation, not-found and everything else happen in Application, and their exceptions reach the caller as Lambda function errors (`api-conventions`).
 
 ## Steps
@@ -24,7 +26,8 @@ Functions contain no logic. Validation, not-found and everything else happen in 
 5. Add every new request and response type to `LambdaFunctionJsonSerializerContext` with `[JsonSerializable(typeof(...))]` (`json-serialization`).
 6. Document the method: `<summary>` with what it returns and in what order, `<param>` for the request and the context, and `<returns>`.
 7. Test it through the handler in `tests/Presentation.Tests.Integration/HandlerTests.cs` (`presentation-integration-tests`). Cover each success and each validation or not-found failure (`test-design`).
-8. Build, and commit the function the build adds to `src/Presentation/serverless.template`. It deploys as its own Lambda function from the same image, with the handler string `Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_<Method>_Generated::<Method>`. Mention it in `docs/RUN.md`.
+8. For an HTTP route, add the `Http<Method>` method as described above, and test it in `tests/Presentation.Tests.Integration/HttpApiTests.cs` for the success, each `400`, and once through the generated class with an `APIGatewayHttpApiV2ProxyRequest`.
+9. Build, and commit the function the build adds to `src/Presentation/serverless.template`. It deploys as its own Lambda function from the same image, with the handler string `Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_<Method>_Generated::<Method>`. Mention it in `docs/RUN.md`.
 
 ## Example
 
@@ -51,6 +54,8 @@ public async Task<Page<Author>> GetAuthors(ListRequest request, ILambdaContext c
 - Build a new `ServiceProvider` per invocation, or register services anywhere but `Startup`. The generated class builds them once, and `Send` scopes each call.
 - Take services as `[FromServices]` parameters. Lambda Annotations 2.4 writes a documentation link for them that doesn't resolve, and the build fails on the warning.
 - Edit a function's entry in `serverless.template` by hand. The build rewrites it from the attribute. Add other resources and settings beside it.
+- Give an `[HttpApi]` method a `Guid` or `string?` parameter. Lambda Annotations 2.4 only binds primitive types from the query string (`AWSLambda0109`), and its generated code has nullable turned off (`CS8669`). Take a `string`, treat empty as missing with `EmptyAsNull`, and parse ids with `ParseId`, which adds a `400` error for text that isn't a GUID.
+- Remove the `CS1574` entry from `NoWarn` in `Presentation.csproj`. It's our one suppression here: the classes generated for `[HttpApi]` methods link their docs to our method with a parameter list they don't share, the link can't resolve, and the generated code isn't ours to fix. A nested `.editorconfig` doesn't reach generated files. Don't add any other code to it.
 - Use `async void`, or block with `.Result` or `.Wait()`.
 - Forget `[JsonSerializable]` for a new type. The serializer has no reflection fallback.
 
