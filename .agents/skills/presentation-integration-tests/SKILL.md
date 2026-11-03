@@ -1,6 +1,6 @@
 ---
 name: presentation-integration-tests
-description: How this Lambda function is tested end to end - calling Handler methods with a TestLambdaContext, services from Startup with a private in-memory database per test class, the generated handler classes, asserting exceptions, and the serializer tests. Use when writing or fixing a test in tests/Presentation.Tests.Integration.
+description: How this Lambda function is tested end to end - calling Handler methods with a TestLambdaContext, services from Startup with a private in-memory database per test class, the generated handler classes, and asserting exceptions. Use when writing or fixing a test in tests/Presentation.Tests.Integration.
 metadata:
   scope: presentation
 ---
@@ -14,7 +14,8 @@ metadata:
 | File | Tests |
 | --- | --- |
 | `HandlerTests.cs` | Every function's results, paging, search and filters, the validation failures, and how the handler reads its settings |
-| `SerializerTests.cs` | The JSON a caller sends and gets back, through the real Lambda serializer |
+
+The serializer is tested on its own in `tests/Presentation.Tests.Unit` (`unit-tests`, `json-serialization`).
 
 There are two ways in, and tests use whichever the case needs:
 

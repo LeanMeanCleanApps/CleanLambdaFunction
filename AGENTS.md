@@ -13,7 +13,8 @@ Start with [Jacques](.agents/agents/jacques.md), our sous-chef and the persona e
 | `src/Presentation` | The Lambda function: the handler and its Lambda Annotations functions, the startup, request and response models, the mapper, the source-generated JSON serializer and the CloudFormation template. |
 | `tests/Application.Tests.Unit` | Handler and validator tests with NSubstitute. |
 | `tests/Infrastructure.Tests.Integration` | Repository tests against a private in-memory SQLite database. |
-| `tests/Presentation.Tests.Integration` | Real calls to the handler and its generated classes with a `TestLambdaContext`, and the serializer tests. |
+| `tests/Presentation.Tests.Unit` | The serializer, tested on its own. |
+| `tests/Presentation.Tests.Integration` | Real calls to the handler and its generated classes with a `TestLambdaContext`. |
 | `.agents/skills` | How we do each kind of change, one skill per folder. |
 
 Application and Infrastructure, and their tests, are identical in the five Lean Mean Clean Apps templates. Only Presentation differs.

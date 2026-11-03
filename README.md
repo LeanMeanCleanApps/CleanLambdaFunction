@@ -29,7 +29,7 @@ cd Acme.Reviews
 | `--name` | Names the solution and its root namespace |
 | `--authorName` | Puts your name on the assembly instead of ours |
 
-That's three layers, three test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
+That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
 
 ## Run it
 

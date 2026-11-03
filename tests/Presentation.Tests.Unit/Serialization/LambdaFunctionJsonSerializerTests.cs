@@ -1,4 +1,4 @@
-namespace CleanLambdaFunction.Presentation.Tests.Integration;
+namespace CleanLambdaFunction.Presentation.Tests.Unit.Serialization;
 
 using System.Text;
 using CleanLambdaFunction.Presentation.LambdaFunction.Models;
@@ -6,7 +6,7 @@ using CleanLambdaFunction.Presentation.LambdaFunction.Serialization;
 using Shouldly;
 using Xunit;
 
-public class SerializerTests
+public class LambdaFunctionJsonSerializerTests
 {
     private readonly LambdaFunctionJsonSerializer serializer = new();
 
