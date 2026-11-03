@@ -46,29 +46,29 @@ curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
 
 ```json
 {
-  "Items": [
+  "items": [
     {
-      "Id": "30fca414-247a-779e-105a-d81aa2506f58",
-      "Title": "Assimilated global infrastructure",
-      "ReviewCount": 1,
-      "AverageStars": 1
+      "id": "30fca414-247a-779e-105a-d81aa2506f58",
+      "title": "Assimilated global infrastructure",
+      "reviewCount": 1,
+      "averageStars": 1
     },
     {
-      "Id": "c27d6600-79a6-9346-2595-a52b7f07dc3e",
-      "Title": "Automated global alliance",
-      "ReviewCount": 3,
-      "AverageStars": 3.3
+      "id": "c27d6600-79a6-9346-2595-a52b7f07dc3e",
+      "title": "Automated global alliance",
+      "reviewCount": 3,
+      "averageStars": 3.3
     }
   ],
-  "TotalCount": 2
+  "totalCount": 2
 }
 ```
 
 Yes, the sample movies are named by a corporate buzzword generator, and the critics are harsh.
 
-Every function returns one page at a time, with a `TotalCount` and a `NextOffset` when there's more to come. Send the `NextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere.
+Every function returns one page at a time, with a `totalCount` and a `nextOffset` when there's more to come. Send the `nextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere.
 
-The image runs `GetMovies` by default. The same handler also has `GetAuthors` and `GetReviews`, and you pick one by passing its full name when the container starts.
+The image runs `GetMovies` by default. The same image also has `GetAuthors` and `GetReviews`, and you pick one by passing its handler string when the container starts. [Lambda Annotations](https://github.com/aws/aws-lambda-dotnet/tree/master/Libraries/src/Amazon.Lambda.Annotations) writes the class behind each one, so you only write the method.
 
 ```bash
 # Free up port 9000 and build the image
@@ -79,7 +79,7 @@ docker build . --target run --tag acme-reviews:local
 docker run --rm -p 9000:8080 \
   -e Database__SeedSampleData=true \
   acme-reviews:local \
-  "Presentation::Acme.Reviews.Presentation.LambdaFunction.Handler::GetReviews"
+  "Presentation::Acme.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
 
 # Reviews take a movie or an author instead of a search term
 curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
@@ -88,7 +88,7 @@ curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
 
 The database is a SQLite file in `/tmp`, the only place Lambda lets you write, and the function stops any work that would outrun the invocation's remaining time. Lambda bills by the millisecond, so it knows when to call it a day.
 
-When you're ready for the real thing, fill in your profile and region in `src/Presentation/aws-lambda-tools-defaults.json` and [deploy it to AWS](https://leanmeancleanapps.github.io/lambda/guides/deploy-to-aws/). Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
+When you're ready for the real thing, fill in your profile, region and stack name in `src/Presentation/aws-lambda-tools-defaults.json` and [deploy it to AWS](https://leanmeancleanapps.github.io/lambda/guides/deploy-to-aws/). Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
 The function is invoked directly, so AWS IAM decides who gets to call it. Want bearer tokens over HTTP? Put it behind an API Gateway HTTP API with a JWT authorizer. Either way, the bouncer stands outside the door, not inside your code.
 

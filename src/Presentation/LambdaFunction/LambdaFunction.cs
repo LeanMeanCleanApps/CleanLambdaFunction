@@ -1,9 +1,9 @@
-[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.SourceGeneratorLambdaJsonSerializer<CleanLambdaFunction.Presentation.LambdaFunction.Serialization.LambdaFunctionJsonSerializerContext>))]
+[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(CleanLambdaFunction.Presentation.LambdaFunction.Serialization.LambdaFunctionJsonSerializer))]
 
 namespace CleanLambdaFunction.Presentation.LambdaFunction;
 
+using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Core;
-using Application;
 using Application.Authors.Queries.GetAuthors;
 using Application.Movies.Queries.GetMovies;
 using Application.Reviews.Queries.GetReviews;
@@ -16,52 +16,27 @@ using Models;
 using AppPaging = Application.Common.Paging;
 
 /// <summary>
-/// The Lambda functions. Lambda creates one handler per execution environment and reuses it for every invocation,
-/// so the services and the database are set up once, when the environment starts.
+/// The Lambda functions. Lambda Annotations generates a class for each one, such as <c>Handler_GetMovies_Generated</c>,
+/// and that class is what Lambda calls. It creates one handler per execution environment and reuses it for every
+/// invocation, so the database is set up once, when the environment starts.
 /// </summary>
 public class Handler
 {
-    /// <summary>
-    /// Lambda can only write to /tmp, so the SQLite database lives there unless the settings say otherwise.
-    /// </summary>
-    public const string DefaultConnectionString = "Data Source=/tmp/movie-reviews.db";
-
-    private readonly ServiceProvider provider;
+    private readonly IServiceProvider services;
     private readonly LambdaFunctionMapper mapper = new();
 
     /// <summary>
-    /// Creates the handler Lambda uses, with settings from environment variables such as
-    /// <c>ConnectionStrings__MovieReviews</c> and <c>Database__SeedSampleData</c>.
+    /// Creates or upgrades the database, and seeds sample data into it when it's empty and
+    /// <c>Database:SeedSampleData</c> is true.
     /// </summary>
-    public Handler()
-        : this(new ConfigurationBuilder().AddEnvironmentVariables().Build())
+    /// <param name="services">The services <see cref="Startup"/> registered.</param>
+    /// <param name="configuration">The settings to read <c>Database:SeedSampleData</c> from.</param>
+    public Handler(IServiceProvider services, IConfiguration configuration)
     {
-    }
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
-    /// <summary>
-    /// Creates a handler from configuration, using the same keys as the other templates.
-    /// </summary>
-    /// <param name="configuration">The settings, read from <c>ConnectionStrings:MovieReviews</c> and <c>Database:SeedSampleData</c>.</param>
-    public Handler(IConfiguration configuration)
-        : this(ConnectionStringFrom(configuration), configuration.GetValue<bool>("Database:SeedSampleData"))
-    {
-    }
-
-    /// <summary>
-    /// Creates a handler for a database, seeding sample data into it when it's empty and asked to.
-    /// </summary>
-    /// <param name="connectionString">The SQLite connection string.</param>
-    /// <param name="seedSampleData">True to seed sample data into an empty database.</param>
-    public Handler(string connectionString, bool seedSampleData)
-    {
-        var services = new ServiceCollection();
-
-        _ = services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
-        _ = services.AddInfrastructure(connectionString);
-        _ = services.AddApplication();
-
-        this.provider = services.BuildServiceProvider(validateScopes: true);
-        _ = this.provider.InitialiseInfrastructure(seedSampleData);
+        this.services = services.InitialiseInfrastructure(configuration.GetValue<bool>("Database:SeedSampleData"));
     }
 
     /// <summary>
@@ -71,6 +46,7 @@ public class Handler
     /// <param name="request">The search term, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of movies, each with its review count and average stars.</returns>
+    [LambdaFunction(ResourceName = "GetMovies", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Movie>> GetMovies(ListRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetMoviesQuery
@@ -89,6 +65,7 @@ public class Handler
     /// <param name="request">The search term, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of authors, each with their review count and average stars.</returns>
+    [LambdaFunction(ResourceName = "GetAuthors", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Author>> GetAuthors(ListRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetAuthorsQuery
@@ -107,6 +84,7 @@ public class Handler
     /// <param name="request">The movie, author, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of reviews.</returns>
+    [LambdaFunction(ResourceName = "GetReviews", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Review>> GetReviews(ListReviewsRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetReviewsQuery
@@ -118,18 +96,6 @@ public class Handler
         }, context);
 
         return ToPage(page, this.mapper.ToPresentation);
-    }
-
-    /// <summary>
-    /// The connection string from configuration, or the default in /tmp when it isn't set.
-    /// </summary>
-    /// <param name="configuration">The settings to read <c>ConnectionStrings:MovieReviews</c> from.</param>
-    /// <returns>The connection string the handler uses.</returns>
-    public static string ConnectionStringFrom(IConfiguration configuration)
-    {
-        ArgumentNullException.ThrowIfNull(configuration);
-
-        return configuration.GetConnectionString("MovieReviews") ?? DefaultConnectionString;
     }
 
     private static Page<TResult> ToPage<T, TResult>(AppPaging.Page<T> page, Func<T, TResult> map)
@@ -146,7 +112,9 @@ public class Handler
             ? new CancellationTokenSource(context.RemainingTime)
             : new CancellationTokenSource();
 
-        await using var scope = this.provider.CreateAsyncScope();
+        // The generated classes create a scope too, but only [FromServices] parameters use it, and the 2.4 generator
+        // writes a documentation link for those that doesn't resolve, which fails the build. So each invocation makes its own.
+        await using var scope = this.services.CreateAsyncScope();
 
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 

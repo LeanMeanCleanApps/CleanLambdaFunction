@@ -9,7 +9,7 @@ metadata:
 
 ## The rule
 
-The runtime image is built on the AWS Lambda .NET base image, which includes the runtime interface emulator. Running the image locally gives an endpoint that invokes the function exactly as Lambda would. `docker-compose.yml` maps it to port 9000 and turns sample data on. The image runs `GetMovies` unless you name another handler.
+The runtime image is built on the AWS Lambda .NET base image, which includes the runtime interface emulator. Running the image locally gives an endpoint that invokes the function exactly as Lambda would. `docker-compose.yml` maps it to port 9000 and turns sample data on. The image runs `GetMovies` unless you name another handler. Each function's handler string names the class Lambda Annotations generates for it, and `src/Presentation/serverless.template` lists them all.
 
 ## Steps
 
@@ -26,7 +26,7 @@ The runtime image is built on the AWS Lambda .NET base image, which includes the
    ```bash
    docker build . --target run --tag cleanlambdafunction:local
    docker run --rm -p 9000:8080 -e Database__SeedSampleData=true cleanlambdafunction:local \
-     "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler::GetAuthors"
+     "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_GetAuthors_Generated::GetAuthors"
    ```
 
 4. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`.

@@ -10,10 +10,10 @@ Start with [Jacques](.agents/agents/jacques.md), our sous-chef and the persona e
 | --- | --- |
 | `src/Application` | Use cases: commands, queries, handlers, validators, entities and the repository interfaces. No framework or database code. |
 | `src/Infrastructure` | EF Core with SQLite, the repository, migrations, sample data and the mapping between database models and Application entities. |
-| `src/Presentation` | The Lambda function: the handler and its functions, request and response models, the mapper and the source-generated JSON serializer. |
+| `src/Presentation` | The Lambda function: the handler and its Lambda Annotations functions, the startup, request and response models, the mapper, the source-generated JSON serializer and the CloudFormation template. |
 | `tests/Application.Tests.Unit` | Handler and validator tests with NSubstitute. |
 | `tests/Infrastructure.Tests.Integration` | Repository tests against a private in-memory SQLite database. |
-| `tests/Presentation.Tests.Integration` | Real calls to the handler with a `TestLambdaContext`, and the serializer tests. |
+| `tests/Presentation.Tests.Integration` | Real calls to the handler and its generated classes with a `TestLambdaContext`, and the serializer tests. |
 | `.agents/skills` | How we do each kind of change, one skill per folder. |
 
 Application and Infrastructure, and their tests, are identical in the five Lean Mean Clean Apps templates. Only Presentation differs.

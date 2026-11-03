@@ -13,12 +13,13 @@ metadata:
 | --- | --- |
 | Names | A verb and a plural noun for lists (`GetMovies`), a verb and a singular noun for one item (`GetMovieById`) |
 | Input | One request record, deserialised from the invocation payload. Optional values have defaults, so `{}` is a valid request |
-| Output | One response record. Lists return `Page<T>(Items, TotalCount, NextOffset)` |
-| Paging | `offset` and `limit` on the request (`paging`). `NextOffset` is the offset of the next page, or left out on the last page |
+| Output | One response record. Lists return `Page<T>(Items, TotalCount, NextOffset)`, written as `items`, `totalCount` and `nextOffset` |
+| Paging | `offset` and `limit` on the request (`paging`). `nextOffset` is the offset of the next page, or left out on the last page |
 | Search | A `query` property on the list request, not a separate function |
 | Errors | Application exceptions are not caught. Lambda returns them as a function error whose `errorType` is the exception name (`ValidationException`, `NotFoundException`) and whose `errorMessage` is its message |
 | Auth | None in the function. API Gateway or the caller's IAM permissions decide who can invoke it (`optional-token-auth`) |
-| JSON | Property names read in any case, written as declared, nulls left out (`json-serialization`) |
+| JSON | Property names read in any case, written in camelCase, nulls left out (`json-serialization`) |
+| Nested items | A review holds its movie and its author, each without counts or averages. Callers get those from `GetMovies` and `GetAuthors` |
 
 Callers, such as Step Functions or another service, match on `errorType` to tell bad input from a missing item and from a fault.
 
