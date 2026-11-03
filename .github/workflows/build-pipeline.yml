@@ -313,7 +313,7 @@ jobs:
             sleep 1
           done
           echo "$RESPONSE"
-          if echo "$RESPONSE" | python3 -c 'import json, sys; sys.exit(0 if json.load(sys.stdin).get("Items") else 1)'; then
+          if echo "$RESPONSE" | python3 -c 'import json, sys; sys.exit(0 if json.load(sys.stdin).get("items") else 1)'; then
             echo "smoke=passed" >> "$GITHUB_OUTPUT"
           else
             echo "::error::The image started but didn't return any movies"
