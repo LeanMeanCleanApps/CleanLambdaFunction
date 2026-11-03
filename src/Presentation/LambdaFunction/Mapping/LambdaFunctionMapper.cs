@@ -4,6 +4,7 @@ using Riok.Mapperly.Abstractions;
 using AppAuthor = Application.Authors.Entities.AuthorSummary;
 using AppMovie = Application.Movies.Entities.MovieSummary;
 using AppReview = Application.Reviews.Entities.Review;
+using AppReviewAuthor = Application.Authors.Entities.ReviewAuthor;
 using AppReviewedMovie = Application.Movies.Entities.ReviewedMovie;
 using PresentationAuthor = Models.Author;
 using PresentationMovie = Models.Movie;
@@ -20,6 +21,9 @@ internal sealed partial class LambdaFunctionMapper
     [MapperIgnoreTarget(nameof(PresentationMovie.AverageStars))]
     private partial PresentationMovie ToPresentation(AppReviewedMovie movie);
 
-    [MapperIgnoreSource(nameof(AppReview.ReviewAuthor))]
+    [MapperIgnoreTarget(nameof(PresentationAuthor.ReviewCount))]
+    [MapperIgnoreTarget(nameof(PresentationAuthor.AverageStars))]
+    private partial PresentationAuthor ToPresentation(AppReviewAuthor author);
+
     public partial PresentationReview ToPresentation(AppReview review);
 }

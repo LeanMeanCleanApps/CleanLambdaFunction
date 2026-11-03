@@ -4,13 +4,21 @@ using Amazon.Lambda.TestUtilities;
 using CleanLambdaFunction.Presentation.LambdaFunction;
 using CleanLambdaFunction.Presentation.LambdaFunction.Models;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
 
 public class HandlerTests
 {
     // Every test class gets its own in-memory database, so tests never share or keep data.
-    private readonly Handler handler = new($"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared", seedSampleData: true);
+    private readonly Handler handler = CreateHandler(new()
+    {
+        ["ConnectionStrings:MovieReviews"] = InMemoryDatabase(),
+        ["Database:SeedSampleData"] = "true"
+    });
     private readonly TestLambdaContext context = new() { RemainingTime = TimeSpan.FromSeconds(30) };
 
     [Fact]
@@ -58,70 +66,36 @@ public class HandlerTests
     }
 
     [Fact]
-    public async Task Handler_ShouldRead_SettingsFromEnvironment()
+    public async Task GeneratedHandlers_ShouldRead_SettingsFromEnvironment()
     {
         // Arrange
-        Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared");
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, "true");
+        Environment.SetEnvironmentVariable("ConnectionStrings__MovieReviews", InMemoryDatabase());
+        Environment.SetEnvironmentVariable("Database__SeedSampleData", "true");
 
         try
         {
             // Act
-            var result = await new Handler().GetMovies(new ListRequest(), this.context);
+            var movies = await new Handler_GetMovies_Generated().GetMovies(new ListRequest(), this.context);
+            var authors = await new Handler_GetAuthors_Generated().GetAuthors(new ListRequest(), this.context);
+            var reviews = await new Handler_GetReviews_Generated().GetReviews(new ListReviewsRequest(), this.context);
 
             // Assert
-            result.TotalCount.ShouldBe(50);
+            movies.TotalCount.ShouldBe(50);
+            authors.TotalCount.ShouldBe(15);
+            reviews.TotalCount.ShouldBe(150);
         }
         finally
         {
-            Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, null);
-            Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
+            Environment.SetEnvironmentVariable("ConnectionStrings__MovieReviews", null);
+            Environment.SetEnvironmentVariable("Database__SeedSampleData", null);
         }
     }
 
     [Fact]
-    public void Handler_ShouldUse_DefaultsWhenEnvironmentIsUnset()
+    public async Task Handler_ShouldNotSeed_WhenSettingIsMissing()
     {
         // Arrange
-        Environment.SetEnvironmentVariable(Handler.ConnectionStringVariable, null);
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
-
-        // Act
-        var connectionString = Handler.ConnectionStringFromEnvironment();
-        var seedSampleData = Handler.SeedSampleDataFromEnvironment();
-
-        // Assert
-        connectionString.ShouldBe(Handler.DefaultConnectionString);
-        seedSampleData.ShouldBeFalse();
-    }
-
-    [Theory]
-    [InlineData("false")]
-    [InlineData("yes")]
-    public void Handler_ShouldNotSeed_UnlessEnvironmentSaysTrue(string value)
-    {
-        // Arrange
-        Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, value);
-
-        try
-        {
-            // Act
-            var seedSampleData = Handler.SeedSampleDataFromEnvironment();
-
-            // Assert
-            seedSampleData.ShouldBeFalse();
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(Handler.SeedSampleDataVariable, null);
-        }
-    }
-
-    [Fact]
-    public async Task Handler_ShouldNotSeed_WhenSampleDataIsOff()
-    {
-        // Arrange
-        var empty = new Handler($"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared", seedSampleData: false);
+        var empty = CreateHandler(new() { ["ConnectionStrings:MovieReviews"] = InMemoryDatabase() });
 
         // Act
         var result = await empty.GetMovies(new ListRequest(), this.context);
@@ -129,6 +103,55 @@ public class HandlerTests
         // Assert
         result.TotalCount.ShouldBe(0);
         result.Items.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Handler_ShouldThrow_WhenSeedSettingIsNotABoolean()
+    {
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => CreateHandler(new()
+        {
+            ["ConnectionStrings:MovieReviews"] = InMemoryDatabase(),
+            ["Database:SeedSampleData"] = "yes"
+        }));
+
+        // Assert
+        exception.Message.ShouldContain("Database:SeedSampleData");
+    }
+
+    [Fact]
+    public void Handler_ShouldThrow_WhenServicesAreNull()
+    {
+        // Act
+        var exception = Should.Throw<ArgumentNullException>(() => new Handler(null!, new ConfigurationBuilder().Build()));
+
+        // Assert
+        exception.ParamName.ShouldBe("services");
+    }
+
+    [Fact]
+    public void Handler_ShouldThrow_WhenConfigurationIsNull()
+    {
+        // Act
+        var exception = Should.Throw<ArgumentNullException>(() => new Handler(new ServiceCollection().BuildServiceProvider(), null!));
+
+        // Assert
+        exception.ParamName.ShouldBe("configuration");
+    }
+
+    [Fact]
+    public void Startup_ShouldUse_DefaultDatabase_WhenUnset()
+    {
+        // Arrange
+        using var provider = new Startup().ConfigureHostBuilder().Services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        // Act
+        var options = scope.ServiceProvider.GetRequiredService<DbContextOptions>();
+        var connectionString = options.Extensions.OfType<RelationalOptionsExtension>().Single().ConnectionString;
+
+        // Assert
+        connectionString.ShouldBe(Startup.DefaultConnectionString);
     }
 
     [Fact]
@@ -199,6 +222,7 @@ public class HandlerTests
         result.TotalCount.ShouldBe(150);
         result.NextOffset.ShouldBe(10);
         result.Items.ShouldAllBe(r => r.Stars >= 1 && r.Stars <= 5 && r.ReviewedMovie != null);
+        result.Items.ShouldAllBe(r => r.ReviewAuthor != null && !string.IsNullOrEmpty(r.ReviewAuthor.FirstName) && !string.IsNullOrEmpty(r.ReviewAuthor.LastName));
     }
 
     [Fact]
@@ -226,6 +250,7 @@ public class HandlerTests
 
         // Assert
         result.TotalCount.ShouldBe(author.ReviewCount);
+        result.Items.ShouldAllBe(r => r.ReviewAuthor!.Id == author.Id);
         result.Items.Average(r => r.Stars).ShouldBe(author.AverageStars.ShouldNotBeNull(), 0.05);
     }
 
@@ -238,5 +263,20 @@ public class HandlerTests
 
         // Assert
         exception.Errors.ShouldContain(e => e.PropertyName == "MovieId");
+    }
+
+    private static Handler CreateHandler(Dictionary<string, string?> settings)
+    {
+        // The same services the generated classes build, with scope validation on to catch a scoped service in a singleton.
+        var builder = new Startup(settings).ConfigureHostBuilder();
+
+        _ = builder.Services.AddSingleton<Handler>();
+
+        return builder.Services.BuildServiceProvider(validateScopes: true).GetRequiredService<Handler>();
+    }
+
+    private static string InMemoryDatabase()
+    {
+        return $"Data Source=Tests-{Guid.NewGuid()};Mode=Memory;Cache=Shared";
     }
 }

@@ -59,14 +59,16 @@ dotnet test
 
 ## Deploying to AWS
 
-`src/Presentation/aws-lambda-tools-defaults.json` holds the defaults for the [Amazon.Lambda.Tools](https://github.com/aws/aws-extensions-for-dotnet-cli) CLI. Fill in your profile and region, then deploy the container image.
+`src/Presentation/serverless.template` is a CloudFormation template with a Lambda function for each handler method, all running the same container image. Lambda Annotations writes each function into it when the project builds, so a new function appears there by itself. Add any other resources you need beside them.
+
+`src/Presentation/aws-lambda-tools-defaults.json` holds the defaults for the [Amazon.Lambda.Tools](https://github.com/aws/aws-extensions-for-dotnet-cli) CLI. Fill in your profile, region and stack name, then deploy the stack. The CLI builds the image from the Dockerfile, pushes it to Amazon ECR and creates or updates every function in one go.
 
 ```bash
 # Once per machine
 dotnet tool install --global Amazon.Lambda.Tools
 
 # Then each time you ship
-dotnet lambda deploy-function --project-location ./src/Presentation
+dotnet lambda deploy-serverless --project-location ./src/Presentation
 ```
 
 The tests never touch `movie-reviews.db`. Each test builds its own in-memory SQLite database from the migrations and the same fixed seed, so no test can change what another one sees and the results are the same every time.

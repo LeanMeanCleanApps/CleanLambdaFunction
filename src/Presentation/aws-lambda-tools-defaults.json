@@ -8,9 +8,6 @@
   "profile": "",
   "region": "",
   "configuration": "Release",
-  "package-type": "image",
-  "function-memory-size": 256,
-  "function-timeout": 30,
-  "image-command": "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler::GetMovies",
-  "docker-host-build-output-dir": "./bin/Release/lambda-publish"
+  "template": "serverless.template",
+  "stack-name": ""
 }

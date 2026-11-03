@@ -1,51 +1,42 @@
-[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.SourceGeneratorLambdaJsonSerializer<CleanLambdaFunction.Presentation.LambdaFunction.Serialization.LambdaFunctionJsonSerializerContext>))]
+[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(CleanLambdaFunction.Presentation.LambdaFunction.Serialization.LambdaFunctionJsonSerializer))]
 
 namespace CleanLambdaFunction.Presentation.LambdaFunction;
 
+using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Core;
-using Application;
 using Application.Authors.Queries.GetAuthors;
 using Application.Movies.Queries.GetMovies;
 using Application.Reviews.Queries.GetReviews;
 using Infrastructure;
 using Mapping;
 using Mediator;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
 using AppPaging = Application.Common.Paging;
 
+/// <summary>
+/// The Lambda functions. Lambda Annotations generates a class for each one, such as <c>Handler_GetMovies_Generated</c>,
+/// and that class is what Lambda calls. It creates one handler per execution environment and reuses it for every
+/// invocation, so the database is set up once, when the environment starts.
+/// </summary>
 public class Handler
 {
-    /// <summary>
-    /// Lambda can only write to /tmp, so the SQLite database lives there unless the environment variable says otherwise.
-    /// </summary>
-    public const string DefaultConnectionString = "Data Source=/tmp/movie-reviews.db";
-
-    public const string ConnectionStringVariable = "ConnectionStrings__MovieReviews";
-
-    /// <summary>
-    /// Set it to true to seed sample data into an empty database. Leave it unset anywhere real data lives.
-    /// </summary>
-    public const string SeedSampleDataVariable = "Database__SeedSampleData";
-
-    private readonly ServiceProvider provider;
+    private readonly IServiceProvider services;
     private readonly LambdaFunctionMapper mapper = new();
 
-    public Handler()
-        : this(ConnectionStringFromEnvironment(), SeedSampleDataFromEnvironment())
+    /// <summary>
+    /// Creates or upgrades the database, and seeds sample data into it when it's empty and
+    /// <c>Database:SeedSampleData</c> is true.
+    /// </summary>
+    /// <param name="services">The services <see cref="Startup"/> registered.</param>
+    /// <param name="configuration">The settings to read <c>Database:SeedSampleData</c> from.</param>
+    public Handler(IServiceProvider services, IConfiguration configuration)
     {
-    }
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
-    public Handler(string connectionString, bool seedSampleData)
-    {
-        var services = new ServiceCollection();
-
-        _ = services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
-        _ = services.AddInfrastructure(connectionString);
-        _ = services.AddApplication();
-
-        this.provider = services.BuildServiceProvider(validateScopes: true);
-        _ = this.provider.InitialiseInfrastructure(seedSampleData);
+        this.services = services.InitialiseInfrastructure(configuration.GetValue<bool>("Database:SeedSampleData"));
     }
 
     /// <summary>
@@ -55,6 +46,7 @@ public class Handler
     /// <param name="request">The search term, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of movies, each with its review count and average stars.</returns>
+    [LambdaFunction(ResourceName = "GetMovies", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Movie>> GetMovies(ListRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetMoviesQuery
@@ -73,6 +65,7 @@ public class Handler
     /// <param name="request">The search term, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of authors, each with their review count and average stars.</returns>
+    [LambdaFunction(ResourceName = "GetAuthors", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Author>> GetAuthors(ListRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetAuthorsQuery
@@ -91,6 +84,7 @@ public class Handler
     /// <param name="request">The movie, author, offset and limit.</param>
     /// <param name="context">The Lambda invocation context.</param>
     /// <returns>One page of reviews.</returns>
+    [LambdaFunction(ResourceName = "GetReviews", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Review>> GetReviews(ListReviewsRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetReviewsQuery
@@ -102,24 +96,6 @@ public class Handler
         }, context);
 
         return ToPage(page, this.mapper.ToPresentation);
-    }
-
-    /// <summary>
-    /// The connection string from the environment, or the default in /tmp when it isn't set.
-    /// </summary>
-    /// <returns>The connection string the handler uses.</returns>
-    public static string ConnectionStringFromEnvironment()
-    {
-        return Environment.GetEnvironmentVariable(ConnectionStringVariable) ?? DefaultConnectionString;
-    }
-
-    /// <summary>
-    /// Whether the environment asks for sample data. Anything other than true, including no value, means no.
-    /// </summary>
-    /// <returns>True when sample data should be seeded into an empty database.</returns>
-    public static bool SeedSampleDataFromEnvironment()
-    {
-        return bool.TryParse(Environment.GetEnvironmentVariable(SeedSampleDataVariable), out var seedSampleData) && seedSampleData;
     }
 
     private static Page<TResult> ToPage<T, TResult>(AppPaging.Page<T> page, Func<T, TResult> map)
@@ -136,7 +112,9 @@ public class Handler
             ? new CancellationTokenSource(context.RemainingTime)
             : new CancellationTokenSource();
 
-        await using var scope = this.provider.CreateAsyncScope();
+        // The generated classes create a scope too, but only [FromServices] parameters use it, and the 2.4 generator
+        // writes a documentation link for those that doesn't resolve, which fails the build. So each invocation makes its own.
+        await using var scope = this.services.CreateAsyncScope();
 
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 

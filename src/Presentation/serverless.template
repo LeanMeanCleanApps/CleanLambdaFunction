@@ -1,0 +1,73 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "The movie reviews functions: one container image, with a Lambda function for each handler method.",
+  "Resources": {
+    "GetMovies": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../.."
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_GetMovies_Generated::GetMovies"
+          ]
+        }
+      }
+    },
+    "GetAuthors": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../.."
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_GetAuthors_Generated::GetAuthors"
+          ]
+        }
+      }
+    },
+    "GetReviews": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "Dockerfile": "Dockerfile",
+        "DockerContext": "../.."
+      },
+      "Properties": {
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Image",
+        "ImageUri": ".",
+        "ImageConfig": {
+          "Command": [
+            "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
+          ]
+        }
+      }
+    }
+  }
+}
