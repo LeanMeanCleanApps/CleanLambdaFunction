@@ -27,7 +27,7 @@ cd Acme.Reviews
 The image ships with the Lambda runtime emulator, so it answers exactly like Lambda would. No AWS account needed until you're ready.
 
 ```bash
-# Build the image and start it with sample data
+# Build the image and start it with sample data, plus a collector and the Aspire dashboard for its telemetry
 docker compose up -d --build
 
 # Ask it for a page of movies
@@ -46,7 +46,7 @@ When you're ready for the real thing, [deploy it to AWS](https://leanmeancleanap
 - **Application**: commands and queries through [Mediator](https://github.com/martinothamar/Mediator), validated by [FluentValidation](https://github.com/FluentValidation/FluentValidation) and mapped by [Mapperly](https://mapperly.riok.app)
 - **Infrastructure**: [Entity Framework Core](https://learn.microsoft.com/ef/core) on SQLite, with optional sample data
 - **Tests**: [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), each on its own throwaway database
-- **Extras**: a Dockerfile that runs as a non-root user, Docker Compose, and a GitHub Actions pipeline that won't let your coverage slip
+- **Extras**: [OpenTelemetry](https://opentelemetry.io) traces, metrics and [Serilog](https://github.com/serilog/serilog) logs over OTLP, a Dockerfile that runs as a non-root user, Docker Compose, and a GitHub Actions pipeline that won't let your coverage slip
 
 ## Releases
 

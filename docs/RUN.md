@@ -65,6 +65,16 @@ To shut it down:
 docker compose down
 ```
 
+## Telemetry
+
+The function always collects [OpenTelemetry](https://opentelemetry.io) traces and metrics, and exports them, along with its logs, only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Every other standard `OTEL_*` variable works too, such as `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL` and `OTEL_EXPORTER_OTLP_HEADERS`. Logs always go to the console as compact JSON as well, so CloudWatch Logs keeps them whatever else you set.
+
+Each invocation is one trace: a span for the function from the [OpenTelemetry Lambda wrapper](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.AWSLambda), and one for the use case. Traces and metrics are flushed before the function returns, because Lambda can freeze the environment the moment it does.
+
+`docker-compose.yml` also starts an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) and the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone). The function sends everything to the collector, and the collector forwards it to the dashboard at <http://localhost:18888>. The dashboard is only a container that receives OTLP; nothing in the solution depends on Aspire. `otel-collector.yaml` is the collector's configuration: an OTLP receiver, the memory limiter and batch processors, and one exporter to swap for your backend.
+
+In AWS, send the function's telemetry to a collector rather than straight to a backend. Lambda container images can't use layers, so either build the [AWS Distro for OpenTelemetry](https://aws-otel.github.io/docs/getting-started/lambda) collector extension into the image, or run a collector as a gateway and point `OTEL_EXPORTER_OTLP_ENDPOINT` at it. Either way, the collector owns batching, retries and the choice of backend, X-Ray included, and changing any of that never touches the function.
+
 ## Tests
 
 ```bash
