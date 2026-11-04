@@ -40,6 +40,7 @@ The runtime image is built on the AWS Lambda .NET base image, which includes the
 
 5. Send a request that fails validation, such as `{ "limit": 0 }`, and check the error's `errorType` and `errorMessage`. An HTTP API function answers a `400` with `content-type: application/problem+json` instead, and `"limit": "0"` in the query string shows it.
 6. Read the container's output with `docker compose logs function`. The runtime's start, invoke and error lines sit between our compact JSON events, one per line, at `Debug` because compose sets `Serilog__MinimumLevel__Default` (`serilog`).
+   Each invocation's trace, metrics and logs also land in the Aspire dashboard at <http://localhost:18888>, through the collector compose starts beside the function (`telemetry`).
 7. Stop it with `docker compose down`.
 
 ## Don't

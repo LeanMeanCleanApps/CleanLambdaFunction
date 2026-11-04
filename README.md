@@ -36,7 +36,7 @@ That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and 
 The image ships with the Lambda runtime emulator, so it answers exactly like Lambda would. No AWS account needed until you're ready.
 
 ```bash
-# Build the image and start it with sample data
+# Build the image and start it with sample data, plus a collector and the Aspire dashboard for its telemetry
 docker compose up -d --build
 
 # Ask it for a page of movies
@@ -66,7 +66,7 @@ curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
 
 Yes, the sample movies are named by a corporate buzzword generator, and the critics are harsh.
 
-Every function returns one page at a time, with a `totalCount` and a `nextOffset` when there's more to come. Send the `nextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere.
+Every function returns one page at a time, with a `totalCount` and a `nextOffset` when there's more to come. Send the `nextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere. Each invocation's logs, trace and metrics land in the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone) at <http://localhost:18888>.
 
 The image runs `GetMovies` by default. The same image also has `GetAuthors` and `GetReviews`, and you pick one by passing its handler string when the container starts. [Lambda Annotations](https://github.com/aws/aws-lambda-dotnet/tree/master/Libraries/src/Amazon.Lambda.Annotations) writes the class behind each one, so you only write the method.
 
@@ -108,6 +108,7 @@ And around the edges:
 
 - **Tests** use [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet). Each test gets its own throwaway in-memory database, so no test can spoil another one's data.
 - **Sample data** comes from [Bogus](https://github.com/bchavez/Bogus), and only when `Database:SeedSampleData` is on. A deployed function never starts with fake reviews.
+- **Telemetry** is [OpenTelemetry](https://opentelemetry.io) all the way: a span for every invocation and use case, metrics from EF Core and the .NET runtime, and [Serilog](https://github.com/serilog/serilog) logs that know which trace they belong to. Logs always go to CloudWatch as compact JSON, and everything leaves over OTLP too when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Docker Compose runs an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) that forwards it all to the Aspire dashboard; in AWS, build the [ADOT](https://aws-otel.github.io/docs/getting-started/lambda) collector extension into the image or point the function at a collector gateway.
 - **Build rules** live in `Directory.Build.props`. Code style and the recommended analyzers run on every build, warnings fail it, and package versions sit in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management).
 - **The pipeline** builds, checks formatting, tests with a 95% coverage bar, makes sure the packed template still works, runs [CodeQL](https://codeql.github.com), reviews new dependencies and their licences, and scans the container and Dockerfile with [Trivy](https://trivy.dev). Then it sums the lot up in one comment on your pull request, so you know exactly who to blame. It needs no accounts, tokens or secrets, so your copy works the moment you push it. Trust is earned.
 - **Dependabot** bundles the month's dependency updates into one pull request on the 15th.
