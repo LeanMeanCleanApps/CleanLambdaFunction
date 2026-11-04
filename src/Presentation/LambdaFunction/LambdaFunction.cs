@@ -15,16 +15,23 @@ using Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
+using OpenTelemetry.Instrumentation.AWSLambda;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using AppPaging = Application.Common.Paging;
 
 /// <summary>
 /// The Lambda functions. Lambda Annotations generates a class for each one, such as <c>Handler_GetMovies_Generated</c>,
 /// and that class is what Lambda calls. It creates one handler per execution environment and reuses it for every
-/// invocation, so the database is set up once, when the environment starts.
+/// invocation, so the database is set up once, when the environment starts. Each invocation is one trace, started by
+/// the OpenTelemetry Lambda wrapper and flushed before the function returns, because Lambda freezes the environment
+/// as soon as it does.
 /// </summary>
 public class Handler
 {
     private readonly IServiceProvider services;
+    private readonly TracerProvider tracerProvider;
+    private readonly MeterProvider meterProvider;
     private readonly LambdaFunctionMapper mapper = new();
 
     /// <summary>
@@ -39,6 +46,8 @@ public class Handler
         ArgumentNullException.ThrowIfNull(configuration);
 
         this.services = services.InitialiseInfrastructure(configuration.GetValue<bool>("Database:SeedSampleData"));
+        this.tracerProvider = services.GetRequiredService<TracerProvider>();
+        this.meterProvider = services.GetRequiredService<MeterProvider>();
     }
 
     /// <summary>
@@ -51,14 +60,7 @@ public class Handler
     [LambdaFunction(ResourceName = "GetMovies", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Movie>> GetMovies(ListRequest request, ILambdaContext context)
     {
-        var page = await this.Send(new GetMoviesQuery
-        {
-            Query = request.Query,
-            Offset = request.Offset,
-            Limit = request.Limit
-        }, context);
-
-        return ToPage(page, this.mapper.ToPresentation);
+        return await this.Invoke(request, context, () => this.ListMovies(request, context));
     }
 
     /// <summary>
@@ -70,14 +72,7 @@ public class Handler
     [LambdaFunction(ResourceName = "GetAuthors", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Author>> GetAuthors(ListRequest request, ILambdaContext context)
     {
-        var page = await this.Send(new GetAuthorsQuery
-        {
-            Query = request.Query,
-            Offset = request.Offset,
-            Limit = request.Limit
-        }, context);
-
-        return ToPage(page, this.mapper.ToPresentation);
+        return await this.Invoke(request, context, () => this.ListAuthors(request, context));
     }
 
     /// <summary>
@@ -88,6 +83,35 @@ public class Handler
     /// <returns>One page of reviews.</returns>
     [LambdaFunction(ResourceName = "GetReviews", PackageType = LambdaPackageType.Image, MemorySize = 256, Timeout = 30)]
     public async Task<Page<Review>> GetReviews(ListReviewsRequest request, ILambdaContext context)
+    {
+        return await this.Invoke(request, context, () => this.ListReviews(request, context));
+    }
+
+    private async Task<Page<Movie>> ListMovies(ListRequest request, ILambdaContext context)
+    {
+        var page = await this.Send(new GetMoviesQuery
+        {
+            Query = request.Query,
+            Offset = request.Offset,
+            Limit = request.Limit
+        }, context);
+
+        return ToPage(page, this.mapper.ToPresentation);
+    }
+
+    private async Task<Page<Author>> ListAuthors(ListRequest request, ILambdaContext context)
+    {
+        var page = await this.Send(new GetAuthorsQuery
+        {
+            Query = request.Query,
+            Offset = request.Offset,
+            Limit = request.Limit
+        }, context);
+
+        return ToPage(page, this.mapper.ToPresentation);
+    }
+
+    private async Task<Page<Review>> ListReviews(ListReviewsRequest request, ILambdaContext context)
     {
         var page = await this.Send(new GetReviewsQuery
         {
@@ -118,12 +142,14 @@ public class Handler
         [FromQuery] int? limit,
         ILambdaContext context)
     {
-        return await Http(() => this.GetMovies(new ListRequest
+        var request = new ListRequest
         {
             Query = EmptyAsNull(query),
             Offset = offset ?? 0,
             Limit = limit ?? AppPaging.Paging.DefaultLimit
-        }, context));
+        };
+
+        return await this.Invoke(request, context, () => Http(() => this.ListMovies(request, context)));
     }
 
     /// <summary>
@@ -142,12 +168,14 @@ public class Handler
         [FromQuery] int? limit,
         ILambdaContext context)
     {
-        return await Http(() => this.GetAuthors(new ListRequest
+        var request = new ListRequest
         {
             Query = EmptyAsNull(query),
             Offset = offset ?? 0,
             Limit = limit ?? AppPaging.Paging.DefaultLimit
-        }, context));
+        };
+
+        return await this.Invoke(request, context, () => Http(() => this.ListAuthors(request, context)));
     }
 
     /// <summary>
@@ -170,23 +198,28 @@ public class Handler
         [FromQuery] int? limit,
         ILambdaContext context)
     {
-        // The generator only binds primitive types from the query string, so the ids arrive as text.
-        var errors = new Dictionary<string, string[]>();
-        var movie = ParseId(movieId, nameof(movieId), errors);
-        var author = ParseId(authorId, nameof(authorId), errors);
-
-        if (errors.Count > 0)
+        return await this.Invoke((movieId, authorId, offset, limit), context, async () =>
         {
-            return BadRequest(errors);
-        }
+            // The generator only binds primitive types from the query string, so the ids arrive as text.
+            var errors = new Dictionary<string, string[]>();
+            var movie = ParseId(movieId, nameof(movieId), errors);
+            var author = ParseId(authorId, nameof(authorId), errors);
 
-        return await Http(() => this.GetReviews(new ListReviewsRequest
-        {
-            MovieId = movie,
-            AuthorId = author,
-            Offset = offset ?? 0,
-            Limit = limit ?? AppPaging.Paging.DefaultLimit
-        }, context));
+            if (errors.Count > 0)
+            {
+                return BadRequest(errors);
+            }
+
+            var request = new ListReviewsRequest
+            {
+                MovieId = movie,
+                AuthorId = author,
+                Offset = offset ?? 0,
+                Limit = limit ?? AppPaging.Paging.DefaultLimit
+            };
+
+            return await Http(() => this.ListReviews(request, context));
+        });
     }
 
     /// <summary>
@@ -252,6 +285,23 @@ public class Handler
         var nextOffset = page.Offset + page.Items.Count;
 
         return new Page<TResult>([.. page.Items.Select(map)], page.TotalCount, nextOffset < page.TotalCount ? nextOffset : null);
+    }
+
+    /// <summary>
+    /// Runs one invocation inside the span the OpenTelemetry Lambda wrapper starts, which picks up the caller's X-Ray
+    /// trace when there is one. The wrapper flushes the traces; the metrics are flushed here, because Lambda can freeze
+    /// the environment for good as soon as the function returns.
+    /// </summary>
+    private async Task<TResult> Invoke<TInput, TResult>(TInput input, ILambdaContext context, Func<Task<TResult>> function)
+    {
+        try
+        {
+            return await AWSLambdaWrapper.TraceAsync(this.tracerProvider, (_, _) => function(), input, context);
+        }
+        finally
+        {
+            _ = this.meterProvider.ForceFlush();
+        }
     }
 
     private async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, ILambdaContext context)
