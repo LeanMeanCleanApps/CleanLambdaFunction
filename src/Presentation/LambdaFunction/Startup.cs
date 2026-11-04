@@ -5,7 +5,6 @@ using Amazon.Lambda.Annotations;
 using Application;
 using Application.Common.Telemetry;
 using Infrastructure;
-using Infrastructure.Telemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -73,13 +72,13 @@ public class Startup(IEnumerable<KeyValuePair<string, string?>> settings)
         var tracing = Sdk.CreateTracerProviderBuilder()
             .ConfigureServices(services => services.AddSingleton<IConfiguration>(builder.Configuration))
             .ConfigureResource(resource => resource.AddAttributes(telemetry.ResourceAttributes))
-            .AddSource(ApplicationTelemetry.Name, InfrastructureTelemetry.Name)
+            .AddSource(ApplicationTelemetry.Name)
             // Telemetry goes over OTLP, not X-Ray, so a "not sampled" X-Ray header from Lambda mustn't switch tracing off.
             .AddAWSLambdaConfigurations(options => options.DisableAwsXRayContextExtraction = true);
         var metrics = Sdk.CreateMeterProviderBuilder()
             .ConfigureServices(services => services.AddSingleton<IConfiguration>(builder.Configuration))
             .ConfigureResource(resource => resource.AddAttributes(telemetry.ResourceAttributes))
-            .AddMeter(ApplicationTelemetry.Name, InfrastructureTelemetry.EntityFrameworkCoreMeterName)
+            .AddMeter("Microsoft.EntityFrameworkCore")
             .AddRuntimeInstrumentation()
             .SetExemplarFilter(ExemplarFilterType.TraceBased);
 

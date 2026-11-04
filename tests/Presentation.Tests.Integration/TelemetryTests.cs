@@ -5,7 +5,6 @@ using Amazon.Lambda.TestUtilities;
 using Application.Common.Telemetry;
 using CleanLambdaFunction.Presentation.LambdaFunction;
 using CleanLambdaFunction.Presentation.LambdaFunction.Models;
-using Infrastructure.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -34,7 +33,7 @@ public sealed class TelemetryTests : IDisposable
         // Other tests invoke functions at the same time, so only spans from this test's own trace are kept.
         this.listener = new ActivityListener
         {
-            ShouldListenTo = source => source.Name is TestSourceName or LambdaSourceName or ApplicationTelemetry.Name or InfrastructureTelemetry.Name,
+            ShouldListenTo = source => source.Name is TestSourceName or LambdaSourceName or ApplicationTelemetry.Name,
             Sample = (ref _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStopped = activity =>
             {
@@ -49,7 +48,7 @@ public sealed class TelemetryTests : IDisposable
     }
 
     [Fact]
-    public async Task Invocation_ShouldTrace_FromFunctionThroughUseCaseToDatabase()
+    public async Task Invocation_ShouldTrace_FromFunctionThroughUseCase()
     {
         // Arrange
         var handler = CreateHandler([]);
@@ -63,14 +62,12 @@ public sealed class TelemetryTests : IDisposable
         var trace = this.SpansIn(parent);
         var function = trace.Single(s => s.Source.Name == LambdaSourceName);
         var useCase = trace.Single(s => s.Source.Name == ApplicationTelemetry.Name);
-        var commands = trace.Where(s => s.Source.Name == InfrastructureTelemetry.Name).ToList();
 
         function.Kind.ShouldBe(ActivityKind.Server);
         function.GetTagItem("faas.name").ShouldBe("GetMovies");
         useCase.DisplayName.ShouldBe("GetMoviesQuery");
         useCase.ParentSpanId.ShouldBe(function.SpanId);
-        commands.ShouldNotBeEmpty();
-        commands.ShouldAllBe(c => c.ParentSpanId == useCase.SpanId);
+        useCase.GetTagItem(ApplicationTelemetry.RequestOutcomeTag).ShouldBe("handled");
     }
 
     [Fact]
