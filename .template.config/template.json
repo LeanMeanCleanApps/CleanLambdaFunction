@@ -9,6 +9,9 @@
     "Clean Architecture"
   ],
   "identity": "CleanLambdaFunction.Template",
+  "groupIdentity": "CleanLambdaFunction",
+  "generatorVersions": "[1.0.0.0-*)",
+  "precedence": "100",
   "name": "Clean Lambda Function Template",
   "description": "An AWS Lambda function on .NET 10, built with Clean Architecture minus the ceremony.",
   "shortName": "cleanlambdafunction",
@@ -28,6 +31,10 @@
   "primaryOutputs": [
     {
       "path": "CleanLambdaFunction.slnx"
+    },
+    {
+      "path": "docs/RUN.md",
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")"
     }
   ],
   "symbols": {
@@ -45,6 +52,10 @@
       "displayName": "Skip restore",
       "description": "Don't restore packages after the solution is created. Handy on a plane, offline, or when you like to do things yourself.",
       "defaultValue": "false"
+    },
+    "HostIdentifier": {
+      "type": "bind",
+      "binding": "host:HostIdentifier"
     }
   },
   "postActions": [
@@ -58,6 +69,33 @@
         }
       ],
       "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    },
+    {
+      "id": "open-run-guide",
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
+      "description": "Open the guide to running the solution.",
+      "manualInstructions": [
+        {
+          "text": "Open docs/RUN.md for how to run the solution."
+        }
+      ],
+      "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
+      "args": {
+        "files": "1"
+      },
+      "continueOnError": true
+    },
+    {
+      "id": "next-steps",
+      "condition": "(HostIdentifier == \"dotnetcli\" || HostIdentifier == \"dotnetcli-preview\")",
+      "description": "What to do next.",
+      "manualInstructions": [
+        {
+          "text": "All set. Change into the new folder and run 'docker compose up -d --build'. docs/RUN.md covers the rest, and AGENTS.md briefs your coding agents."
+        }
+      ],
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
       "continueOnError": true
     }
   ]
