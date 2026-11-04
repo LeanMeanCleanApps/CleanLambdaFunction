@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/dotnetcli.host",
+  "symbolInfo": {
+    "authorName": {
+      "longName": "authorName",
+      "shortName": "an"
+    },
+    "skipRestore": {
+      "longName": "no-restore",
+      "shortName": ""
+    }
+  },
+  "usageExamples": [
+    "--name Acme.Reviews --authorName \"Carl Franklin\"",
+    "--name Acme.Reviews --authorName \"Richard Campbell\" --no-restore"
+  ]
+}

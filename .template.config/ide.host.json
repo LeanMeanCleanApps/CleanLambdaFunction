@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/ide.host",
+  "icon": "icon.png",
+  "symbolInfo": [
+    {
+      "id": "authorName",
+      "name": {
+        "text": "Author name"
+      },
+      "description": {
+        "text": "Your name, for the Authors and Copyright lines. Better know an author."
+      },
+      "isVisible": true
+    }
+  ]
+}

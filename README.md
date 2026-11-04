@@ -26,8 +26,11 @@ cd Acme.Reviews
 
 | Option | What it does |
 | --- | --- |
-| `--name` | Names the solution and its root namespace |
-| `--authorName` | Puts your name on the assembly instead of ours |
+| `--name`, `-n` | Names the solution and its root namespace |
+| `--authorName`, `-an` | Puts your name on the assembly instead of ours |
+| `--no-restore` | Skips the package restore that normally runs once the solution is created |
+
+Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanlambdafunction --help` lists them in the terminal.
 
 That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
 
