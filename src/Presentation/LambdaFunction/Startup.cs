@@ -3,6 +3,7 @@ namespace CleanLambdaFunction.Presentation.LambdaFunction;
 using System.Reflection;
 using Amazon.Lambda.Annotations;
 using Application;
+using Application.Versions.Entities;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -83,6 +84,7 @@ public class Startup(IEnumerable<KeyValuePair<string, string?>> settings)
         _ = builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
         _ = builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("MovieReviews") ?? DefaultConnectionString);
         _ = builder.Services.AddApplication();
+        _ = builder.Services.AddSingleton(VersionInfo.FromAssembly(typeof(Startup).Assembly));
 
         #endregion Services
 
