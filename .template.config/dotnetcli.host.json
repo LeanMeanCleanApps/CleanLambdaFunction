@@ -11,7 +11,7 @@
     }
   },
   "usageExamples": [
-    "--name Acme.Reviews --authorName \"Carl Franklin\"",
-    "--name Acme.Reviews --authorName \"Richard Campbell\" --no-restore"
+    "--name Acme.Reviews --authorName \"Your Name\"",
+    "--name Acme.Reviews --no-restore"
   ]
 }
