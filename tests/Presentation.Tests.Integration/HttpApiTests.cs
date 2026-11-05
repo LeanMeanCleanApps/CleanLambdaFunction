@@ -5,10 +5,10 @@ using System.Text.Json;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.TestUtilities;
-using CleanLambdaFunction.Presentation.LambdaFunction;
-using CleanLambdaFunction.Presentation.LambdaFunction.Models;
-using CleanLambdaFunction.Presentation.LambdaFunction.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.LambdaFunction;
+using Presentation.LambdaFunction.Models;
+using Presentation.LambdaFunction.Serialization;
 using Shouldly;
 using Xunit;
 

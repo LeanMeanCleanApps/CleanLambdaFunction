@@ -1,8 +1,8 @@
 namespace CleanLambdaFunction.Application.Tests.Unit.Common.Exceptions;
 
 using Application.Authors.Entities;
-using CleanLambdaFunction.Application.Common.Enums;
-using CleanLambdaFunction.Application.Common.Exceptions;
+using Application.Common.Enums;
+using Application.Common.Exceptions;
 using Shouldly;
 using Xunit;
 

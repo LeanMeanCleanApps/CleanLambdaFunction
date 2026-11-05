@@ -2,8 +2,8 @@ namespace CleanLambdaFunction.Presentation.Tests.Unit.Telemetry;
 
 using System.Reflection;
 using System.Reflection.Emit;
-using CleanLambdaFunction.Presentation.LambdaFunction.Telemetry;
 using Microsoft.Extensions.Configuration;
+using Presentation.LambdaFunction.Telemetry;
 using Shouldly;
 using Xunit;
 
