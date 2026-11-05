@@ -20,14 +20,17 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). [
 dotnet new install CleanLambdaFunction.Template
 
 # Create a solution
-dotnet new cleanlambdafunction --name Acme.Reviews --authorName "Your Name"
-cd Acme.Reviews
+dotnet new cleanlambdafunction --name WorksOnMyMachine.Reviews --authorName "Your Name"
+cd WorksOnMyMachine.Reviews
 ```
 
-| Option | What it does |
-| --- | --- |
-| `--name` | Names the solution and its root namespace |
-| `--authorName` | Puts your name on the assembly instead of ours |
+| Option | Default | What it does |
+| --- | --- | --- |
+| `--name`, `-n` | The folder's name | Names the solution and its root namespace |
+| `--authorName`, `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
+| `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
+
+Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanlambdafunction --help` lists them in the terminal.
 
 That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
 
@@ -79,7 +82,7 @@ docker build . --target run --tag acme-reviews:local
 docker run --rm -p 9000:8080 \
   -e Database__SeedSampleData=true \
   acme-reviews:local \
-  "Presentation::Acme.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
+  "Presentation::WorksOnMyMachine.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
 
 # Reviews take a movie or an author instead of a search term
 curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \

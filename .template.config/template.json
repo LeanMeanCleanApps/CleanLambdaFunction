@@ -2,30 +2,101 @@
   "$schema": "https://json.schemastore.org/template",
   "author": "Stephen Walsh",
   "classifications": [
-    "Clean Architecture",
-    "Cloud",
     "AWS",
     "Lambda",
     "Serverless",
-    "Dotnet",
-    "Docker"
+    "Cloud",
+    "Clean Architecture"
   ],
   "identity": "CleanLambdaFunction.Template",
+  "groupIdentity": "CleanLambdaFunction",
+  "generatorVersions": "[1.0.0.0-*)",
+  "precedence": "100",
   "name": "Clean Lambda Function Template",
-  "description": "A dotnet new template for an AWS Lambda function packaged as a container image, built with a streamlined Clean Architecture on .NET 10.",
+  "description": "An AWS Lambda function on .NET 10, built with Clean Architecture minus the ceremony.",
   "shortName": "cleanlambdafunction",
   "tags": {
     "language": "C#",
-    "type": "project"
+    "type": "solution"
   },
   "sourceName": "CleanLambdaFunction",
+  "defaultName": "WorksOnMyMachine.Reviews",
   "preferNameDirectory": true,
+  "constraints": {
+    "sdk": {
+      "type": "sdk-version",
+      "args": "[10.0.100,)"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "CleanLambdaFunction.slnx"
+    },
+    {
+      "path": "docs/RUN.md",
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")"
+    }
+  ],
   "symbols": {
     "authorName": {
       "type": "parameter",
-      "displayName": "The name of the author of the solution.",
+      "datatype": "string",
+      "displayName": "Author name",
+      "description": "Who gets the credit in the Authors and Copyright of the Presentation project. Leave it and Stephen Walsh gets the credit, which he'd enjoy more than you would.",
       "defaultValue": "Stephen Walsh",
       "replaces": "Stephen Walsh"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Skip restore",
+      "description": "Don't restore packages after the solution is created. Handy on a plane, offline, or when you like to do things yourself.",
+      "defaultValue": "false"
+    },
+    "HostIdentifier": {
+      "type": "bind",
+      "binding": "host:HostIdentifier"
     }
-  }
+  },
+  "postActions": [
+    {
+      "id": "restore",
+      "condition": "(!skipRestore)",
+      "description": "Restore the NuGet packages the solution needs, so the first build has less to do.",
+      "manualInstructions": [
+        {
+          "text": "Run 'dotnet restore'. It takes less time than reading this sentence twice."
+        }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    },
+    {
+      "id": "open-run-guide",
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
+      "description": "Open the guide to running the solution.",
+      "manualInstructions": [
+        {
+          "text": "Open docs/RUN.md for how to run the solution."
+        }
+      ],
+      "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
+      "args": {
+        "files": "1"
+      },
+      "continueOnError": true
+    },
+    {
+      "id": "next-steps",
+      "condition": "(HostIdentifier == \"dotnetcli\" || HostIdentifier == \"dotnetcli-preview\")",
+      "description": "What to do next.",
+      "manualInstructions": [
+        {
+          "text": "All set. Change into the new folder and run 'docker compose up -d --build'. docs/RUN.md covers the rest, and AGENTS.md briefs your coding agents."
+        }
+      ],
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "continueOnError": true
+    }
+  ]
 }
