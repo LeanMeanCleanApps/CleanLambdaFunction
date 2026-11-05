@@ -1,8 +1,8 @@
 namespace CleanLambdaFunction.Presentation.Tests.Unit.Serialization;
 
 using System.Text;
-using CleanLambdaFunction.Presentation.LambdaFunction.Models;
-using CleanLambdaFunction.Presentation.LambdaFunction.Serialization;
+using Presentation.LambdaFunction.Models;
+using Presentation.LambdaFunction.Serialization;
 using Shouldly;
 using Xunit;
 
