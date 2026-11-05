@@ -3,11 +3,11 @@ namespace CleanLambdaFunction.Presentation.Tests.Integration;
 using System.Diagnostics;
 using Amazon.Lambda.TestUtilities;
 using Application.Common.Telemetry;
-using CleanLambdaFunction.Presentation.LambdaFunction;
-using CleanLambdaFunction.Presentation.LambdaFunction.Models;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Presentation.LambdaFunction;
+using Presentation.LambdaFunction.Models;
 using Shouldly;
 using Xunit;
 
