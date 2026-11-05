@@ -17,11 +17,11 @@ dotnet new cleanlambdafunction --name WorksOnMyMachine.Reviews --authorName "You
 cd WorksOnMyMachine.Reviews
 ```
 
-| Option | What it does |
-| --- | --- |
-| `--name`, `-n` | Names the solution and its root namespace |
-| `--authorName`, `-an` | Puts your name on the assembly instead of ours |
-| `--no-restore` | Skips the package restore that normally runs once the solution is created |
+| Option | Default | What it does |
+| --- | --- | --- |
+| `--name`, `-n` | The folder's name | Names the solution and its root namespace |
+| `--authorName`, `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
+| `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
 
 Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanlambdafunction --help` lists them in the terminal.
 
