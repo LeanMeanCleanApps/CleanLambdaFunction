@@ -1,6 +1,27 @@
 {
   "$schema": "https://json.schemastore.org/ide.host",
   "icon": "icon.png",
+  "description": {
+    "text": "An AWS Lambda function on .NET 10, built with Clean Architecture minus the ceremony. Mug not included."
+  },
+  "tags": [
+    {
+      "type": "platform",
+      "add": [
+        "Linux",
+        "macOS",
+        "Windows",
+        "Cloud"
+      ]
+    },
+    {
+      "type": "projectType",
+      "add": [
+        "Cloud",
+        "Service"
+      ]
+    }
+  ],
   "symbolInfo": [
     {
       "id": "authorName",
@@ -8,9 +29,11 @@
         "text": "Author name"
       },
       "description": {
-        "text": "Your name, for the Authors and Copyright lines. Is that enough detail for Richard to send you a .NET Rocks mug?"
+        "text": "Your name, for the Authors and Copyright lines."
       },
-      "isVisible": true
+      "isVisible": true,
+      "persistenceScope": "shared",
+      "persistenceScopeName": "LeanMeanCleanApps"
     }
   ]
 }
