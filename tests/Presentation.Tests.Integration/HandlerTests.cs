@@ -1,14 +1,14 @@
 namespace CleanLambdaFunction.Presentation.Tests.Integration;
 
 using Amazon.Lambda.TestUtilities;
-using CleanLambdaFunction.Presentation.LambdaFunction;
-using CleanLambdaFunction.Presentation.LambdaFunction.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Presentation.LambdaFunction;
+using Presentation.LambdaFunction.Models;
 using Serilog.Extensions.Logging;
 using Shouldly;
 using Xunit;
