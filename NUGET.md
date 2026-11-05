@@ -13,8 +13,8 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). [
 dotnet new install CleanLambdaFunction.Template
 
 # Create a solution
-dotnet new cleanlambdafunction --name Acme.Reviews --authorName "Your Name"
-cd Acme.Reviews
+dotnet new cleanlambdafunction --name WorksOnMyMachine.Reviews --authorName "Your Name"
+cd WorksOnMyMachine.Reviews
 ```
 
 | Option | What it does |

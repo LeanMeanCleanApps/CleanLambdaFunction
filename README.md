@@ -20,8 +20,8 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). [
 dotnet new install CleanLambdaFunction.Template
 
 # Create a solution
-dotnet new cleanlambdafunction --name Acme.Reviews --authorName "Your Name"
-cd Acme.Reviews
+dotnet new cleanlambdafunction --name WorksOnMyMachine.Reviews --authorName "Your Name"
+cd WorksOnMyMachine.Reviews
 ```
 
 | Option | What it does |
@@ -82,7 +82,7 @@ docker build . --target run --tag acme-reviews:local
 docker run --rm -p 9000:8080 \
   -e Database__SeedSampleData=true \
   acme-reviews:local \
-  "Presentation::Acme.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
+  "Presentation::WorksOnMyMachine.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
 
 # Reviews take a movie or an author instead of a search term
 curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
