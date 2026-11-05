@@ -20,7 +20,7 @@
     "type": "solution"
   },
   "sourceName": "CleanLambdaFunction",
-  "defaultName": "Acme.Reviews",
+  "defaultName": "WorksOnMyMachine.Reviews",
   "preferNameDirectory": true,
   "constraints": {
     "sdk": {
