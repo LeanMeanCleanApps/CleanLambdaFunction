@@ -6,15 +6,21 @@
     "Lambda",
     "Serverless",
     "Cloud",
+    "Lean Mean Clean Apps",
     "Clean Architecture"
   ],
   "identity": "CleanLambdaFunction.Template",
   "groupIdentity": "CleanLambdaFunction",
   "generatorVersions": "[1.0.0.0-*)",
   "precedence": "100",
-  "name": "Clean Lambda Function Template",
+  "name": "Clean AWS Lambda Function Template",
   "description": "An AWS Lambda function on .NET 10, built with Clean Architecture minus the ceremony.",
-  "shortName": "cleanlambdafunction",
+  "shortName": [
+    "cleanlambdafunction",
+    "cleanlambda",
+    "lmca-lambda",
+    "leanmeancleanapps-lambda"
+  ],
   "tags": {
     "language": "C#",
     "type": "solution"

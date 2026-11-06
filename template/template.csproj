@@ -4,10 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <PackageType>Template</PackageType>
     <PackageId>CleanLambdaFunction.Template</PackageId>
-    <Title>Clean Lambda Function Template</Title>
+    <Title>Clean AWS Lambda Function Template</Title>
     <Authors>Stephen Walsh</Authors>
     <Description>A dotnet new template for an AWS Lambda function packaged as a container image, built with a streamlined Clean Architecture on .NET 10.</Description>
-    <PackageTags>dotnet;csharp;dotnet-template;template;clean-architecture;cqrs;mediator;fluentvalidation;mapperly;entity-framework-core;docker;aws;aws-lambda;serverless</PackageTags>
+    <PackageTags>dotnet;csharp;dotnet-template;template;clean-architecture;cqrs;mediator;fluentvalidation;mapperly;entity-framework-core;docker;aws;aws-lambda;serverless;clean;cleanarchitecture;lmc;lmca;leanmeanclean;leanmeancleanapps;project-template;solution-template;net10;dotnet10;sqlite;efcore;serilog;opentelemetry;lambda;amazon;lambda-annotations;cloudformation;container-image</PackageTags>
     <PackageProjectUrl>https://leanmeancleanapps.github.io/lambda/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LeanMeanCleanApps/CleanLambdaFunction</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
