@@ -117,6 +117,8 @@ public class Handler
         {
             MovieId = request.MovieId,
             AuthorId = request.AuthorId,
+            Query = request.Query,
+            MinStars = request.MinStars,
             Offset = request.Offset,
             Limit = request.Limit
         }, context);
@@ -183,6 +185,8 @@ public class Handler
     /// </summary>
     /// <param name="movieId">Only reviews of this movie. Leave empty for every movie.</param>
     /// <param name="authorId">Only reviews by this author. Leave empty for every author.</param>
+    /// <param name="query">Only reviews whose text contains this, ignoring case. Leave empty for every review.</param>
+    /// <param name="minStars">Only reviews with at least this many stars, from 1 to 5. Leave empty for every rating.</param>
     /// <param name="offset">The number of reviews to skip.</param>
     /// <param name="limit">The most reviews to return, from 1 to 50.</param>
     /// <param name="context">The Lambda invocation context.</param>
@@ -194,11 +198,13 @@ public class Handler
     public async Task<IHttpResult> HttpGetReviews(
         [FromQuery] string movieId,
         [FromQuery] string authorId,
+        [FromQuery] string query,
+        [FromQuery] int? minStars,
         [FromQuery] int? offset,
         [FromQuery] int? limit,
         ILambdaContext context)
     {
-        return await this.Invoke((movieId, authorId, offset, limit), context, async () =>
+        return await this.Invoke((movieId, authorId, query, minStars, offset, limit), context, async () =>
         {
             // The generator only binds primitive types from the query string, so the ids arrive as text.
             var errors = new Dictionary<string, string[]>();
@@ -214,6 +220,8 @@ public class Handler
             {
                 MovieId = movie,
                 AuthorId = author,
+                Query = query,
+                MinStars = minStars,
                 Offset = offset ?? 0,
                 Limit = limit ?? AppPaging.Paging.DefaultLimit
             };

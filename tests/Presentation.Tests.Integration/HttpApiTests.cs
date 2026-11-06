@@ -82,13 +82,28 @@ public class HttpApiTests
     }
 
     [Fact]
+    public async Task HttpGetReviews_ShouldFilter_ByTextAndStars()
+    {
+        // Act
+        var response = Read(await this.handler.HttpGetReviews(string.Empty, string.Empty, "great", 4, null, 50, this.context));
+
+        // Assert
+        response.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+
+        var page = Body<Page<Review>>(response);
+
+        page.Items.ShouldNotBeEmpty();
+        page.Items.ShouldAllBe(r => r.Stars >= 4);
+    }
+
+    [Fact]
     public async Task HttpGetReviews_ShouldReturn_ReviewsOfMovie()
     {
         // Arrange
         var movieId = (await this.handler.GetReviews(new ListReviewsRequest(), this.context)).Items[0].ReviewedMovie.ShouldNotBeNull().Id;
 
         // Act
-        var response = Read(await this.handler.HttpGetReviews(movieId.ToString(), string.Empty, null, 50, this.context));
+        var response = Read(await this.handler.HttpGetReviews(movieId.ToString(), string.Empty, string.Empty, null, null, 50, this.context));
 
         // Assert
         response.StatusCode.ShouldBe((int)HttpStatusCode.OK);
@@ -102,7 +117,7 @@ public class HttpApiTests
     public async Task HttpGetReviews_ShouldReturn_BadRequest_WhenIdsAreNotGuids()
     {
         // Act
-        var response = Read(await this.handler.HttpGetReviews("not-a-movie", "not-an-author", null, null, this.context));
+        var response = Read(await this.handler.HttpGetReviews("not-a-movie", "not-an-author", string.Empty, null, null, null, this.context));
 
         // Assert
         response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
@@ -116,7 +131,7 @@ public class HttpApiTests
     public async Task HttpGetReviews_ShouldReturn_BadRequest_WhenMovieIdIsEmpty()
     {
         // Act
-        var response = Read(await this.handler.HttpGetReviews(Guid.Empty.ToString(), string.Empty, null, null, this.context));
+        var response = Read(await this.handler.HttpGetReviews(Guid.Empty.ToString(), string.Empty, string.Empty, null, null, null, this.context));
 
         // Assert
         response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);

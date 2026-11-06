@@ -79,7 +79,7 @@ public sealed class TelemetryTests : IDisposable
         using var parent = TestSource.StartActivity("Test")!;
 
         // Act
-        _ = await handler.HttpGetReviews("not-a-guid", string.Empty, null, null, this.context);
+        _ = await handler.HttpGetReviews("not-a-guid", string.Empty, string.Empty, null, null, null, this.context);
 
         // Assert
         var trace = this.SpansIn(parent);

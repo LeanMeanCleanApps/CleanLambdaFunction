@@ -259,6 +259,17 @@ public class HandlerTests
     }
 
     [Fact]
+    public async Task GetReviews_ShouldFilter_ByTextAndStars()
+    {
+        // Act
+        var result = await this.handler.GetReviews(new ListReviewsRequest { Query = "great", MinStars = 4, Limit = 50 }, this.context);
+
+        // Assert
+        result.Items.ShouldNotBeEmpty();
+        result.Items.ShouldAllBe(r => r.Stars >= 4 && r.Text!.Contains("great", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task GetReviews_ShouldReturn_FirstPage()
     {
         // Act
