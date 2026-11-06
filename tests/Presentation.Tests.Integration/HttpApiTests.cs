@@ -12,6 +12,7 @@ using Presentation.LambdaFunction.Serialization;
 using Shouldly;
 using Xunit;
 
+[Collection(ProcessEnvironment.Name)]
 public class HttpApiTests
 {
     private static readonly LambdaFunctionJsonSerializer Serializer = new();

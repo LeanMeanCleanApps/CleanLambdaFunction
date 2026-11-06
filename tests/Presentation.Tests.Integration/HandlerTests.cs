@@ -13,6 +13,7 @@ using Serilog.Extensions.Logging;
 using Shouldly;
 using Xunit;
 
+[Collection(ProcessEnvironment.Name)]
 public class HandlerTests
 {
     // Every test class gets its own in-memory database, so tests never share or keep data.
