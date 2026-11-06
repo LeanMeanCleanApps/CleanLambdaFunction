@@ -37,6 +37,20 @@ public class HandlerTests
         result.Items.ShouldAllBe(m => m.ReviewCount == 0 ? m.AverageStars == null : m.AverageStars != null);
     }
 
+    [Theory]
+    [InlineData("space")]
+    [InlineData("love")]
+    [InlineData("murder")]
+    [InlineData("dragon")]
+    public async Task GetMovies_ShouldFind_SampleMovies(string query)
+    {
+        // Act
+        var result = await this.handler.GetMovies(new ListRequest { Query = query }, this.context);
+
+        // Assert
+        result.Items.ShouldNotBeEmpty();
+    }
+
     [Fact]
     public async Task GetMovies_ShouldReturn_NextPage()
     {
