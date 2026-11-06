@@ -13,6 +13,7 @@ using Serilog.Extensions.Logging;
 using Shouldly;
 using Xunit;
 
+[Collection(ProcessEnvironment.Name)]
 public class HandlerTests
 {
     // Every test class gets its own in-memory database, so tests never share or keep data.
@@ -35,6 +36,20 @@ public class HandlerTests
         result.NextOffset.ShouldBe(10);
         result.Items.ShouldAllBe(m => m.Id != Guid.Empty && !string.IsNullOrWhiteSpace(m.Title));
         result.Items.ShouldAllBe(m => m.ReviewCount == 0 ? m.AverageStars == null : m.AverageStars != null);
+    }
+
+    [Theory]
+    [InlineData("space")]
+    [InlineData("love")]
+    [InlineData("murder")]
+    [InlineData("dragon")]
+    public async Task GetMovies_ShouldFind_SampleMovies(string query)
+    {
+        // Act
+        var result = await this.handler.GetMovies(new ListRequest { Query = query }, this.context);
+
+        // Assert
+        result.Items.ShouldNotBeEmpty();
     }
 
     [Fact]

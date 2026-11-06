@@ -7,4 +7,5 @@ namespace CleanLambdaFunction.Presentation.LambdaFunction.Models;
 /// <param name="Stars">The star rating, from 1 to 5.</param>
 /// <param name="ReviewedMovie">The movie the review is about.</param>
 /// <param name="ReviewAuthor">The author who wrote the review.</param>
-public record Review(Guid Id, int Stars, Movie? ReviewedMovie, Author? ReviewAuthor);
+/// <param name="Text">What the author said about the movie, if anything.</param>
+public record Review(Guid Id, int Stars, Movie? ReviewedMovie, Author? ReviewAuthor, string? Text = null);

@@ -45,7 +45,7 @@ docker compose up -d --build
 
 # Ask it for a page of movies
 curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
-  -d '{ "query": "global", "limit": 2 }'
+  -d '{ "query": "space", "limit": 2 }'
 
 # Run the tests while you're here
 dotnet test
