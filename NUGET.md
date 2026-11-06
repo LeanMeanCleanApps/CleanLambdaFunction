@@ -44,7 +44,7 @@ The image ships with the Lambda runtime emulator, so it answers exactly like Lam
 docker compose up -d --build
 
 # Ask it for a page of movies
-curl -X POST http://localhost:8750/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
   -d '{ "query": "space", "limit": 2 }'
 
 # Run the tests while you're here
