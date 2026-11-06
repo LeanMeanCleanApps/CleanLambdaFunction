@@ -25,6 +25,8 @@ dotnet new cleanlambdafunction --name WorksOnMyMachine.Reviews --authorName "You
 cd WorksOnMyMachine.Reviews
 ```
 
+`cleanlambda` works too, for anyone who'd rather not type `cleanlambdafunction` every time, and so do `lmca-lambda` and `leanmeancleanapps-lambda`. `dotnet new search leanmeanclean` lists the whole family.
+
 | Option | Default | What it does |
 | --- | --- | --- |
 | `--name`, `-n` | The folder's name | Names the solution and its root namespace |
