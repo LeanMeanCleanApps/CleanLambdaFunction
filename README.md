@@ -45,7 +45,7 @@ The image ships with the Lambda runtime emulator, so it answers exactly like Lam
 docker compose up -d --build
 
 # Ask it for a page of movies
-curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
   -d '{ "query": "space", "limit": 2 }'
 ```
 
@@ -72,23 +72,23 @@ curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
 
 The sample movies are all made up, and the critics are harsh.
 
-Every function returns one page at a time, with a `totalCount` and a `nextOffset` when there's more to come. Send the `nextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere. Each invocation's logs, trace and metrics land in the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone) at <http://localhost:18888>.
+Every function returns one page at a time, with a `totalCount` and a `nextOffset` when there's more to come. Send the `nextOffset` back as `offset` to get the next page. Movies and authors come with their review count and average stars, worked out by the database rather than in a loop somewhere. Each invocation's logs, trace and metrics land in the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone) at <http://localhost:7352>.
 
 The image runs `GetMovies` by default. The same image also has `GetAuthors` and `GetReviews`, and you pick one by passing its handler string when the container starts. [Lambda Annotations](https://github.com/aws/aws-lambda-dotnet/tree/master/Libraries/src/Amazon.Lambda.Annotations) writes the class behind each one, so you only write the method.
 
 ```bash
-# Free up port 9000 and build the image
+# Free up port 7350 and build the image
 docker compose down
 docker build . --target run --tag acme-reviews:local
 
 # Start the reviews function instead of movies
-docker run --rm -p 9000:8080 \
+docker run --rm -p 7350:8080 \
   -e Database__SeedSampleData=true \
   acme-reviews:local \
   "Presentation::WorksOnMyMachine.Reviews.Presentation.LambdaFunction.Handler_GetReviews_Generated::GetReviews"
 
 # Reviews take a movie or an author instead of a search term
-curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
   -d '{ "movieId": "cb188ef6-14e7-f85f-2f78-924c2ab26b28", "limit": 5 }'
 ```
 

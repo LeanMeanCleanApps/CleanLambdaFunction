@@ -25,7 +25,7 @@ Build the image and start it.
 ```bash
 docker build . --target run --tag cleanlambdafunction:local
 
-docker run --rm -p 9000:8080 \
+docker run --rm -p 7350:8080 \
   -e Database__SeedSampleData=true \
   cleanlambdafunction:local
 ```
@@ -33,19 +33,19 @@ docker run --rm -p 9000:8080 \
 Invoke the function from another terminal.
 
 ```bash
-curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
   -d '{ "query": "global", "offset": 0, "limit": 5 }'
 ```
 
 To try one of the HTTP API functions, run the image with its handler and post an API Gateway HTTP API (payload 2.0) event. The emulator doesn't pretend to be API Gateway, so you send the event it would have sent.
 
 ```bash
-docker run --rm -p 9000:8080 \
+docker run --rm -p 7350:8080 \
   -e Database__SeedSampleData=true \
   cleanlambdafunction:local \
   "Presentation::CleanLambdaFunction.Presentation.LambdaFunction.Handler_HttpGetMovies_Generated::HttpGetMovies"
 
-curl -X POST http://localhost:9000/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
   -d '{ "version": "2.0", "routeKey": "GET /movies", "rawPath": "/movies", "queryStringParameters": { "query": "global", "limit": "5" }, "requestContext": { "http": { "method": "GET", "path": "/movies" } } }'
 ```
 
@@ -65,13 +65,26 @@ To shut it down:
 docker compose down
 ```
 
+## Ports
+
+Every Lean Mean Clean template has its own block of ten ports on your machine, so this solution runs beside one made from another template without a clash. This one uses 7350 to 7359:
+
+| Port | What listens |
+| --- | --- |
+| 7350 | The function, through the runtime interface emulator |
+| 7352 | The Aspire dashboard |
+| 7353 | The OpenTelemetry Collector, OTLP over gRPC |
+| 7354 | The OpenTelemetry Collector, OTLP over HTTP |
+
+Inside its container the emulator still listens on 8080, as Lambda's base image expects, and the dashboard and collector keep their usual ports. To move a port, change the left-hand side of its mapping in `docker-compose.yml`. 7355 to 7359 are spare for anything you add.
+
 ## Telemetry
 
 The function always collects [OpenTelemetry](https://opentelemetry.io) traces and metrics, and exports them, along with its logs, only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Every other standard `OTEL_*` variable works too, such as `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL` and `OTEL_EXPORTER_OTLP_HEADERS`. Logs always go to the console as compact JSON as well, so CloudWatch Logs keeps them whatever else you set.
 
 Each invocation is one trace: a span for the function from the [OpenTelemetry Lambda wrapper](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.AWSLambda), and one for the use case. Traces and metrics are flushed before the function returns, because Lambda can freeze the environment the moment it does.
 
-`docker-compose.yml` also starts an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) and the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone). The function sends everything to the collector, and the collector forwards it to the dashboard at <http://localhost:18888>. The dashboard is only a container that receives OTLP; nothing in the solution depends on Aspire. The dashboard has no login and the collector accepts OTLP from anyone on ports 4317 and 4318. That's on purpose for a developer's machine, so don't run this compose file anywhere other people can reach. `otel-collector.yaml` is the collector's configuration: an OTLP receiver, the memory limiter and batch processors, and one exporter to swap for your backend.
+`docker-compose.yml` also starts an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) and the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone). The function sends everything to the collector, and the collector forwards it to the dashboard at <http://localhost:7352>. The dashboard is only a container that receives OTLP; nothing in the solution depends on Aspire. The dashboard has no login and the collector accepts OTLP from anyone on ports 7353 and 7354. That's on purpose for a developer's machine, so don't run this compose file anywhere other people can reach. `otel-collector.yaml` is the collector's configuration: an OTLP receiver, the memory limiter and batch processors, and one exporter to swap for your backend.
 
 In AWS, send the function's telemetry to a collector rather than straight to a backend. Lambda container images can't use layers, so either build the [AWS Distro for OpenTelemetry](https://aws-otel.github.io/docs/getting-started/lambda) collector extension into the image, or run a collector as a gateway and point `OTEL_EXPORTER_OTLP_ENDPOINT` at it. Either way, the collector owns batching, retries and the choice of backend, X-Ray included, and changing any of that never touches the function.
 

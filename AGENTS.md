@@ -27,7 +27,7 @@ Run these before you say a change is done. They're what CI runs.
 dotnet build                                   # warnings are errors
 dotnet test                                    # every test project
 dotnet format --verify-no-changes              # style, whitespace and usings
-docker compose up -d --build                   # the function at http://localhost:9000, see lambda-emulator
+docker compose up -d --build                   # the function at http://localhost:7350, see lambda-emulator
 ```
 
 The `coverage` skill has the command that checks the 95% line coverage gate locally.

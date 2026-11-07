@@ -355,9 +355,9 @@ jobs:
           # Start the image the way the README does and ask it for a page of movies. Scanning an
           # image proves nothing about whether it runs, so this is the check that it actually does.
           echo "smoke=failed" >> "$GITHUB_OUTPUT"
-          docker run --detach --name function --publish 9000:8080 --env Database__SeedSampleData=true "$IMAGE"
+          docker run --detach --name function --publish 7350:8080 --env Database__SeedSampleData=true "$IMAGE"
           for attempt in $(seq 1 30); do
-            if RESPONSE=$(curl --silent --fail --max-time 30 -X POST http://localhost:9000/2015-03-31/functions/function/invocations -d '{ "limit": 2 }'); then
+            if RESPONSE=$(curl --silent --fail --max-time 30 -X POST http://localhost:7350/2015-03-31/functions/function/invocations -d '{ "limit": 2 }'); then
               break
             fi
             sleep 1
