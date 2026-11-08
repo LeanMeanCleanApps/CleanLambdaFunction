@@ -15,9 +15,9 @@ dotnet test
 docker compose up -d --build
 ```
 
-See [docs/RUN.md](docs/RUN.md) for the local ports, `dotnet run`, the Aspire dashboard, database migrations and health checks.
+See [docs/RUN.md](docs/RUN.md) for the ports, the database and its migrations, the Aspire dashboard and the tests.
 
 ## Docs and coding agents
 
-- [AGENTS.md](AGENTS.md) — architecture rules, project map and the skills in `.agents/skills/` for coding agents.
-- [Template documentation](https://leanmeancleanapps.github.io/lambda/) — guides, reference pages and design decisions.
+- [AGENTS.md](AGENTS.md): architecture rules, project map and the skills in `.agents/skills/` for coding agents.
+- [Template documentation](https://leanmeancleanapps.github.io/lambda/): guides, reference pages and design decisions.
