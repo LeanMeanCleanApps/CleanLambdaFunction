@@ -10,7 +10,7 @@ body:
 
         A few things first:
         - Can't get as far as a working solution? The **Template creation problem** form asks the right questions for that.
-        - The [troubleshooting page](https://leanmeancleanapps.github.io/lambda/reference/troubleshooting/) covers the usual suspects. It's short, and it might save you a form.
+        - The [troubleshooting page](https://leanmeanclean.dev/lambda/reference/troubleshooting/) covers the usual suspects. It's short, and it might save you a form.
         - Security vulnerabilities go through the [security policy](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/policy), not a public issue.
   - type: textarea
     id: description

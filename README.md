@@ -1,4 +1,4 @@
-[![Clean Lambda Function](https://raw.githubusercontent.com/LeanMeanCleanApps/brand/main/assets/banners/png/lambda.png)](https://leanmeancleanapps.github.io/lambda/)
+[![Clean Lambda Function](https://raw.githubusercontent.com/LeanMeanCleanApps/brand/main/assets/banners/png/lambda.png)](https://leanmeanclean.dev/lambda/)
 
 [![Build Pipeline](https://img.shields.io/github/actions/workflow/status/LeanMeanCleanApps/CleanLambdaFunction/build-pipeline.yml?branch=main&label=Build%20Pipeline&logo=github&style=for-the-badge)](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/actions/workflows/build-pipeline.yml)
 [![NuGet](https://img.shields.io/nuget/v/CleanLambdaFunction.Template?label=NuGet&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanLambdaFunction.Template)
@@ -7,9 +7,9 @@
 
 A `dotnet new` template for an [AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/lambda-csharp.html) in .NET 10, built with a streamlined Clean Architecture and shipped as a container image. All the layers you need, none of the ceremony you don't.
 
-It's one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates. They share the same Application and Infrastructure layers and differ only in how they face the world. Same genes, different haircuts.
+It's one of five [Lean Mean Clean Apps](https://leanmeanclean.dev/) templates. They share the same Application and Infrastructure layers and differ only in how they face the world. Same genes, different haircuts.
 
-The guides, the reference and the reasoning behind every opinion live at **[leanmeancleanapps.github.io/lambda](https://leanmeancleanapps.github.io/lambda/)**. This is the version for people who skim. We see you.
+The guides, the reference and the reasoning behind every opinion live at **[leanmeanclean.dev/lambda](https://leanmeanclean.dev/lambda/)**. This is the version for people who skim. We see you.
 
 ## Get started
 
@@ -94,7 +94,7 @@ curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
 
 The database is a SQLite file in `/tmp`, the only place Lambda lets you write, and the function stops any work that would outrun the invocation's remaining time. Lambda bills by the millisecond, so it knows when to call it a day.
 
-When you're ready for the real thing, fill in your profile, region and stack name in `src/Presentation/aws-lambda-tools-defaults.json` and [deploy it to AWS](https://leanmeancleanapps.github.io/lambda/guides/deploy-to-aws/). Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
+When you're ready for the real thing, fill in your profile, region and stack name in `src/Presentation/aws-lambda-tools-defaults.json` and [deploy it to AWS](https://leanmeanclean.dev/lambda/guides/deploy-to-aws/). Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
 The lists also come over HTTP. `HttpGetMovies`, `HttpGetAuthors` and `HttpGetReviews` sit behind an API Gateway HTTP API at `GET /movies`, `GET /authors` and `GET /reviews`, taking `query`, `offset` and `limit` (or `movieId` and `authorId`) from the query string. They answer `200` with the page, or `400` with problem details when the request doesn't add up. The deployed stack prints the URL as `ApiUrl`.
 
@@ -119,7 +119,7 @@ And around the edges:
 - **The pipeline** builds, checks formatting, tests with a 95% coverage bar, makes sure the packed template still works, runs [CodeQL](https://codeql.github.com), reviews new dependencies and their licences, and scans the container and Dockerfile with [Trivy](https://trivy.dev). Then it sums the lot up in one comment on your pull request, so you know exactly who to blame. Your copy, or a solution from `dotnet new`, gets the format check, build and tests with no accounts, tokens or secrets, so it goes green the moment you push it. The scans stay switched off outside our organisation until you want them, and Jacques can switch them on with you. Trust is earned.
 - **Dependabot** bundles the month's dependency updates into one pull request on the 15th.
 
-The [architecture page](https://leanmeancleanapps.github.io/lambda/explanation/architecture/) has the long version, with full credit to [Jason Taylor's template](https://github.com/jasontaylordev/CleanArchitecture) and [Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) for the ideas.
+The [architecture page](https://leanmeanclean.dev/lambda/explanation/architecture/) has the long version, with full credit to [Jason Taylor's template](https://github.com/jasontaylordev/CleanArchitecture) and [Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) for the ideas.
 
 ## Releases
 

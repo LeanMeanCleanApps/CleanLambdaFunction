@@ -16,7 +16,7 @@ Every solution starts with a simple pipeline that runs the commands in `AGENTS.m
 | `dotnet new` | `.github/workflows/ci.yml` | Restore, format, build, test and the coverage gate |
 | "Use this template" on GitHub | `.github/workflows/build-pipeline.yml`, the template's own | Format, build and test. The scans and the template's pack, verify and release jobs only run in the LeanMeanCleanApps organisation, and show as not run anywhere else |
 
-The **Set up CI** guide for your template on the [Lean Mean Clean Apps docs site](https://leanmeancleanapps.github.io/) shows both, and links the template's full Build Pipeline as a worked example of every check below.
+The **Set up CI** guide for your template on the [Lean Mean Clean Apps docs site](https://leanmeanclean.dev/) shows both, and links the template's full Build Pipeline as a worked example of every check below.
 
 ## Adding a check
 
