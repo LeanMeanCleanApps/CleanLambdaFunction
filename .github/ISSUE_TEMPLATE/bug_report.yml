@@ -1,17 +1,22 @@
 name: Bug report
-description: Something in the template or the generated solution doesn't work as expected.
+description: The template or a solution made from it does something it shouldn't, or doesn't do something it should.
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug. Every bug found here is one that doesn't end up in somebody's production. Please search the [existing issues](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/issues) first, and report security vulnerabilities through the [security policy](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/policy) instead.
+        Thanks for taking the time to report a bug. Every bug found here is one that doesn't end up in somebody's production, possibly yours.
+
+        A few things first:
+        - Can't get as far as a working solution? The **Template creation problem** form asks the right questions for that.
+        - The [troubleshooting page](https://leanmeancleanapps.github.io/lambda/reference/troubleshooting/) covers the usual suspects. It's short, and it might save you a form.
+        - Security vulnerabilities go through the [security policy](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/policy), not a public issue.
   - type: textarea
     id: description
     attributes:
       label: What happened?
-      description: A clear description of the bug.
+      description: A clear description of the bug. Screenshots are welcome; screenshots of code are not.
     validations:
       required: true
   - type: textarea
@@ -29,15 +34,15 @@ body:
     id: expected
     attributes:
       label: Expected behaviour
-      description: What you expected to happen instead.
+      description: What you expected to happen instead. Reasonable expectations only, please.
     validations:
       required: true
   - type: input
     id: template-version
     attributes:
       label: Template version
-      description: Run `dotnet new list cleanlambdafunction` or check NuGet.
-      placeholder: "2026.10.27.1"
+      description: Run `dotnet new list cleanlambdafunction` or check NuGet. "The latest one" was true when you installed it.
+      placeholder: "2026.11.01.264"
     validations:
       required: true
   - type: input
@@ -57,8 +62,8 @@ body:
         - Running with the .NET CLI
         - Running in Docker
         - Running the tests
-        - Installing or creating from the template
         - The GitHub Actions pipeline
+        - In my IDE
         - Somewhere else
     validations:
       required: true
@@ -66,7 +71,12 @@ body:
     id: os
     attributes:
       label: Operating system
-      placeholder: "Windows 11, macOS 15, Ubuntu 24.04"
+      placeholder: "Windows 11, macOS 26, Ubuntu 24.04"
+  - type: textarea
+    id: changes
+    attributes:
+      label: What have you changed?
+      description: Anything you changed in the generated solution before it broke. "Nothing" is a fine answer, as long as it's true.
   - type: textarea
     id: logs
     attributes:

@@ -1,0 +1,63 @@
+name: Docs problem
+description: A step in the README, docs/RUN.md or the docs site is wrong, missing, out of date or just baffling.
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Docs that are wrong are worse than no docs at all, because at least no docs don't lie to you.
+
+        Spotted a typo? A pull request is quicker than this form, and every page on the [docs site](https://leanmeancleanapps.github.io/lambda/) is fair game.
+  - type: input
+    id: location
+    attributes:
+      label: Where is it?
+      description: A link to the page or file, ideally to the heading.
+      placeholder: "https://leanmeancleanapps.github.io/lambda/..."
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What's wrong with it?
+      options:
+        - It's wrong, and following it breaks something
+        - It's out of date
+        - A step is missing
+        - It's confusing
+        - A link is broken
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it say, and what should it say?
+      description: If you worked out the right answer, tell us. You've done the hard part already.
+    validations:
+      required: true
+  - type: input
+    id: template-version
+    attributes:
+      label: Template version
+      description: Only if it matters. Run `dotnet new list cleanlambdafunction`.
+      placeholder: "2026.11.01.264"
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to fix it?
+      options:
+        - "Yes, I'll open a pull request"
+        - "No, I've done my bit by telling you"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and this hasn't been reported yet.
+          required: true
+        - label: I agree to follow this project's [code of conduct](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/blob/main/CODE_OF_CONDUCT.md).
+          required: true
