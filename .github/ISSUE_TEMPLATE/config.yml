@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Ask a question
+    url: https://github.com/LeanMeanCleanApps/CleanLambdaFunction/blob/main/SUPPORT.md
+    about: How do I...? Start here. Issues are for things that need fixing, and the answer is probably already written down.
   - name: Report a security vulnerability
     url: https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/advisories/new
-    about: Please report security vulnerabilities privately, not in a public issue.
-  - name: Get help using the template
-    url: https://github.com/LeanMeanCleanApps/CleanLambdaFunction/blob/main/SUPPORT.md
-    about: Where to look for help before opening an issue.
+    about: Privately, please. Some things are best not announced to the whole internet.
   - name: Sponsor the project
     url: https://github.com/sponsors/stphnwlsh
     about: Keep all five Lean Mean Clean Apps templates current, and the coffee flowing.

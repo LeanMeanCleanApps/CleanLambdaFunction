@@ -1,0 +1,82 @@
+name: Template creation problem
+description: dotnet new install, dotnet new, or the first build or run of a brand-new solution fails.
+title: "[Template]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sorry. The first five minutes are meant to be the easy part.
+
+        Before you fill this in, try the two things that fix most of these: run `dotnet new uninstall CleanLambdaFunction.Template` and install it again, and check `dotnet --version` against the SDK in the [README](https://github.com/LeanMeanCleanApps/CleanLambdaFunction#readme). The [troubleshooting page](https://leanmeancleanapps.github.io/lambda/reference/troubleshooting/) has the rest.
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Where did it stop?
+      options:
+        - Installing the template (dotnet new install)
+        - Creating a solution (dotnet new cleanlambdafunction)
+        - The first dotnet build or dotnet test
+        - The first run, with the .NET CLI or Docker Compose
+        - The first GitHub Actions run in my new repository
+        - Somewhere else
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands you ran
+      description: Exactly as you typed them, options included. The options are usually where the plot thickens.
+      placeholder: |
+        dotnet new install CleanLambdaFunction.Template
+        dotnet new cleanlambdafunction --name Sample
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: What it said
+      description: The full error or output. This is rendered as code, so no backticks are needed.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: template-version
+    attributes:
+      label: Template version
+      description: Run `dotnet new list cleanlambdafunction`, or say which version you asked for.
+      placeholder: "2026.11.01.264"
+    validations:
+      required: true
+  - type: input
+    id: sdk-version
+    attributes:
+      label: .NET SDK version
+      description: Run `dotnet --version` in the folder you created the solution in. global.json has opinions about this.
+      placeholder: "10.0.100"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and shell
+      placeholder: "Windows 11 with PowerShell, macOS 26 with zsh, Ubuntu 24.04 with bash"
+    validations:
+      required: true
+  - type: input
+    id: docker
+    attributes:
+      label: Docker version, if Docker is involved
+      description: Run `docker version`. Leave it blank if Docker never came up.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I uninstalled and reinstalled the template, and it still fails.
+          required: true
+        - label: I searched the existing issues and this hasn't been reported yet.
+          required: true
+        - label: I agree to follow this project's [code of conduct](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/blob/main/CODE_OF_CONDUCT.md).
+          required: true

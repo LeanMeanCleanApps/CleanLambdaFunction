@@ -1,12 +1,14 @@
 name: Feature request
-description: Suggest an improvement to the template.
+description: Suggest an improvement to the template or the solutions it creates.
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the suggestion. Good ideas are always welcome, and so are the strange ones. This template is one of five that share their Application and Infrastructure layers, so it helps to know whether your idea is specific to this template or would apply to all of them.
+        Thanks for the suggestion. Good ideas are always welcome, and so are the strange ones.
+
+        This template is one of five that share their Application and Infrastructure layers, so an idea for those layers lands in all five. That's a feature, not a bug, but it does mean it helps to know which layers your idea touches. The aim is lean: a feature that every user would have to delete is a hard sell.
   - type: textarea
     id: problem
     attributes:
@@ -25,7 +27,7 @@ body:
     id: alternatives
     attributes:
       label: Alternatives considered
-      description: Any other approaches or workarounds you've thought about.
+      description: Any other approaches or workarounds you've thought about, including "live with it", which is always on the table.
   - type: dropdown
     id: scope
     attributes:
@@ -37,6 +39,7 @@ body:
         - Infrastructure (all five templates)
         - Tests
         - Build pipeline or repository setup
+        - Agent skills
         - Documentation
         - Not sure
     validations:
@@ -47,7 +50,7 @@ body:
       label: Would you like to work on it?
       options:
         - "Yes, I'd like to open a pull request"
-        - "No, I'm just suggesting it"
+        - "No, I'm just here for the ideas"
     validations:
       required: true
   - type: checkboxes
