@@ -2,15 +2,15 @@
 
 A `dotnet new` template for an [AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/lambda-csharp.html) in .NET 10, built with a streamlined Clean Architecture and shipped as a container image. All the layers you need, none of the ceremony you don't.
 
-It's one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates, for Minimal APIs, Model Context Protocol, GraphQL, Web API controllers and AWS Lambda. They share the same Application and Infrastructure layers and differ only in how they face the world. The full docs live at [leanmeancleanapps.github.io/lambda](https://leanmeancleanapps.github.io/lambda/).
+It's one of five [Lean Mean Clean Apps](https://leanmeanclean.dev/) templates, for Minimal APIs, Model Context Protocol, GraphQL, Web API controllers and AWS Lambda. They share the same Application and Infrastructure layers and differ only in how they face the world. The full docs live at [leanmeanclean.dev/lambda](https://leanmeanclean.dev/lambda/).
 
 | Template | Presentation | Package | Docs |
 | --- | --- | --- | --- |
-| Clean Minimal API | ASP.NET Core Minimal APIs | [CleanMinimalApi.Template](https://www.nuget.org/packages/CleanMinimalApi.Template) | [Docs](https://leanmeancleanapps.github.io/minimalapi/) |
-| Clean Model Context Protocol | Model Context Protocol server | [CleanModelContextProtocol.Template](https://www.nuget.org/packages/CleanModelContextProtocol.Template) | [Docs](https://leanmeancleanapps.github.io/mcp/) |
-| Clean GraphQL API | GraphQL with Hot Chocolate | [CleanGraphQLApi.Template](https://www.nuget.org/packages/CleanGraphQLApi.Template) | [Docs](https://leanmeancleanapps.github.io/graphql/) |
-| Clean Web API | ASP.NET Core controllers | [CleanWebApi.Template](https://www.nuget.org/packages/CleanWebApi.Template) | [Docs](https://leanmeancleanapps.github.io/webapi/) |
-| **Clean Lambda Function** | AWS Lambda, you are here | [CleanLambdaFunction.Template](https://www.nuget.org/packages/CleanLambdaFunction.Template) | [Docs](https://leanmeancleanapps.github.io/lambda/) |
+| Clean Minimal API | ASP.NET Core Minimal APIs | [CleanMinimalApi.Template](https://www.nuget.org/packages/CleanMinimalApi.Template) | [Docs](https://leanmeanclean.dev/minimalapi/) |
+| Clean Model Context Protocol | Model Context Protocol server | [CleanModelContextProtocol.Template](https://www.nuget.org/packages/CleanModelContextProtocol.Template) | [Docs](https://leanmeanclean.dev/mcp/) |
+| Clean GraphQL API | GraphQL with Hot Chocolate | [CleanGraphQLApi.Template](https://www.nuget.org/packages/CleanGraphQLApi.Template) | [Docs](https://leanmeanclean.dev/graphql/) |
+| Clean Web API | ASP.NET Core controllers | [CleanWebApi.Template](https://www.nuget.org/packages/CleanWebApi.Template) | [Docs](https://leanmeanclean.dev/webapi/) |
+| **Clean Lambda Function** | AWS Lambda, you are here | [CleanLambdaFunction.Template](https://www.nuget.org/packages/CleanLambdaFunction.Template) | [Docs](https://leanmeanclean.dev/lambda/) |
 
 ## Get started
 
@@ -51,7 +51,7 @@ curl -X POST http://localhost:7350/2015-03-31/functions/function/invocations \
 dotnet test
 ```
 
-When you're ready for the real thing, [deploy it to AWS](https://leanmeancleanapps.github.io/lambda/guides/deploy-to-aws/). The function is invoked directly, so AWS IAM decides who gets to call it.
+When you're ready for the real thing, [deploy it to AWS](https://leanmeanclean.dev/lambda/guides/deploy-to-aws/). The function is invoked directly, so AWS IAM decides who gets to call it.
 
 ## What's inside
 
@@ -71,7 +71,7 @@ dotnet new update
 
 ## More help
 
-- [Docs](https://leanmeancleanapps.github.io/lambda/) for guides, a reference and why it's built this way
+- [Docs](https://leanmeanclean.dev/lambda/) for guides, a reference and why it's built this way
 - [GitHub](https://github.com/LeanMeanCleanApps/CleanLambdaFunction) for the code, [issues](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/issues) and [release notes](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/releases)
 - [Security policy](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/policy) to report a vulnerability privately
 

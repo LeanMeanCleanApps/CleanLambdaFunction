@@ -13,7 +13,7 @@ metadata:
 | --- | --- |
 | A short introduction, install, the options table and links | `README.md` and `NUGET.md` (the package page) |
 | Running the app, environments, database and tests | `docs/RUN.md`, which also ships in every generated solution |
-| Full guides | The docs site, <https://leanmeancleanapps.github.io>, in the `leanmeancleanapps.github.io` repository, with a home page per template |
+| Full guides | The docs site, <https://leanmeanclean.dev>, in the `leanmeancleanapps.github.io` repository, with a home page per template |
 | How to contribute | `CONTRIBUTING.md` |
 | How agents work here | `AGENTS.md` and `.agents/` |
 

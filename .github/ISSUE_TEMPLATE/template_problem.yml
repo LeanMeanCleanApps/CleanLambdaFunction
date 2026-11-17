@@ -8,7 +8,7 @@ body:
       value: |
         Sorry. The first five minutes are meant to be the easy part.
 
-        Before you fill this in, try the two things that fix most of these: run `dotnet new uninstall CleanLambdaFunction.Template` and install it again, and check `dotnet --version` against the SDK in the [README](https://github.com/LeanMeanCleanApps/CleanLambdaFunction#readme). The [troubleshooting page](https://leanmeancleanapps.github.io/lambda/reference/troubleshooting/) has the rest.
+        Before you fill this in, try the two things that fix most of these: run `dotnet new uninstall CleanLambdaFunction.Template` and install it again, and check `dotnet --version` against the SDK in the [README](https://github.com/LeanMeanCleanApps/CleanLambdaFunction#readme). The [troubleshooting page](https://leanmeanclean.dev/lambda/reference/troubleshooting/) has the rest.
   - type: dropdown
     id: stage
     attributes:

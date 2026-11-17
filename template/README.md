@@ -20,4 +20,4 @@ See [docs/RUN.md](docs/RUN.md) for the ports, the database and its migrations, t
 ## Docs and coding agents
 
 - [AGENTS.md](AGENTS.md): architecture rules, project map and the skills in `.agents/skills/` for coding agents.
-- [Template documentation](https://leanmeancleanapps.github.io/lambda/): guides, reference pages and design decisions.
+- [Template documentation](https://leanmeanclean.dev/lambda/): guides, reference pages and design decisions.

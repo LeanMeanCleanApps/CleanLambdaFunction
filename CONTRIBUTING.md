@@ -2,7 +2,7 @@
 
 Thanks for stopping by. Bug reports, ideas, documentation fixes and pull requests are all welcome, roughly in that order of how quickly they get a reply.
 
-This is a [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) project, built and looked after in spare time with strong coffee and a healthy disregard for pomp and ceremony. The team is one person at the moment, so replies are best effort, and the fastest way to get something changed is to make it easy to say yes to. If you'd like to make it two people, pull requests are how that starts.
+This is a [Lean Mean Clean Apps](https://leanmeanclean.dev/) project, built and looked after in spare time with strong coffee and a healthy disregard for pomp and ceremony. The team is one person at the moment, so replies are best effort, and the fastest way to get something changed is to make it easy to say yes to. If you'd like to make it two people, pull requests are how that starts.
 
 ## Before you start
 
@@ -13,7 +13,7 @@ This is a [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) project, 
 
 ## One template in a family of five
 
-This repository is one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates that share everything except the Presentation layer:
+This repository is one of five [Lean Mean Clean Apps](https://leanmeanclean.dev/) templates that share everything except the Presentation layer:
 
 - [Clean Minimal API](https://github.com/LeanMeanCleanApps/CleanMinimalApi)
 - [Clean Model Context Protocol](https://github.com/LeanMeanCleanApps/CleanModelContextProtocol)

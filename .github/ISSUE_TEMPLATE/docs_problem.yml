@@ -8,13 +8,13 @@ body:
       value: |
         Thanks. Docs that are wrong are worse than no docs at all, because at least no docs don't lie to you.
 
-        Spotted a typo? A pull request is quicker than this form, and every page on the [docs site](https://leanmeancleanapps.github.io/lambda/) is fair game.
+        Spotted a typo? A pull request is quicker than this form, and every page on the [docs site](https://leanmeanclean.dev/lambda/) is fair game.
   - type: input
     id: location
     attributes:
       label: Where is it?
       description: A link to the page or file, ideally to the heading.
-      placeholder: "https://leanmeancleanapps.github.io/lambda/..."
+      placeholder: "https://leanmeanclean.dev/lambda/..."
     validations:
       required: true
   - type: dropdown
