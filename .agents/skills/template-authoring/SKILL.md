@@ -13,9 +13,10 @@ The repository is both a working solution and a `dotnet new` template. `.templat
 
 | Symbol | Option | Replaces |
 | --- | --- | --- |
-| `authorName` | `--authorName`, `-an` | `Stephen Walsh` (`--author` is reserved by `dotnet new`) |
+| `authorName` | `--authorName`<br>`-an` | `Stephen Walsh` (`--author` is reserved by `dotnet new`) |
 | `includeAuth` | `--include-auth` | Nothing. A toggle, off by default. Off, every line of authentication code is left out; on, `authority` and `audience` switch on through `isEnabled` and `authority` becomes required through `isRequired` (web templates) |
-| `authority`, `audience` | `--authority`, `-iss`, `--audience`, `-aud` | The empty `Authentication` settings in `appsettings.json`, only with `--include-auth`. Passed without it, they're ignored without a word (web templates) |
+| `authority` | `--authority`<br>`-iss` | The empty `Authentication:Authority` setting in `appsettings.json`, only with `--include-auth`. Passed without it, it's ignored without a word (web templates) |
+| `audience` | `--audience`<br>`-aud` | The empty `Authentication:Audience` setting in `appsettings.json`, only with `--include-auth`. Passed without it, it's ignored without a word (web templates) |
 | `skipRestore` | `--no-restore` | Nothing; it turns the restore post action off |
 
 Three files in `.template.config` make up the template, and every symbol appears in each one that applies:

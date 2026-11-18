@@ -28,8 +28,8 @@ cd WorksOnMyMachine.Reviews
 
 | Option | Default | What it does |
 | --- | --- | --- |
-| `--name`, `-n` | The folder's name | Names the solution and its root namespace |
-| `--authorName`, `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
+| `--name`<br>`-n` | The folder's name | Names the solution and its root namespace |
+| `--authorName`<br>`-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
 | `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
 
 Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanlambdafunction --help` lists them in the terminal.
@@ -141,7 +141,7 @@ dotnet new update
 
 ## Contributing
 
-Bug reports, ideas and pull requests are all welcome, and typo fixes doubly so. Start with the [contributing guide](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Security problems go through the [security policy](SECURITY.md), not an issue.
+Bug reports, ideas and pull requests are all welcome, and typo fixes doubly so. Start with the [contributing guide](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Security problems go through the [security policy](SECURITY.md), not an issue. Questions go to [Discussions](https://github.com/orgs/LeanMeanCleanApps/discussions), and if anything here gets in your way, the [accessibility statement](ACCESSIBILITY.md) says how to tell us.
 
 ## Who built this
 

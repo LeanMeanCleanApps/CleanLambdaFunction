@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Ask a question
-    url: https://github.com/LeanMeanCleanApps/CleanLambdaFunction/blob/main/SUPPORT.md
-    about: How do I...? Start here. Issues are for things that need fixing, and the answer is probably already written down.
+    url: https://github.com/orgs/LeanMeanCleanApps/discussions
+    about: How do I...? Ask in Discussions. Issues are for things that need fixing, and the answer is probably already written down.
+  - name: Report an accessibility barrier
+    url: https://github.com/LeanMeanCleanApps/leanmeancleanapps.github.io/issues/new?template=accessibility_barrier.yml
+    about: Something got in your way. All five templates and the website share one form, so nothing falls down the back of the couch.
   - name: Report a security vulnerability
     url: https://github.com/LeanMeanCleanApps/CleanLambdaFunction/security/advisories/new
     about: Privately, please. Some things are best not announced to the whole internet.
