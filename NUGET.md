@@ -27,11 +27,11 @@ cd WorksOnMyMachine.Reviews
 
 `cleanlambda` works too, for anyone who'd rather not type `cleanlambdafunction` every time, and so do `lmca-lambda` and `leanmeancleanapps-lambda`. `dotnet new search leanmeanclean` lists the whole family.
 
-| Option | Default | What it does |
-| --- | --- | --- |
-| `--name`, `-n` | The folder's name | Names the solution and its root namespace |
-| `--authorName`, `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
-| `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
+| Option | Short | Default | What it does |
+| --- | --- | --- | --- |
+| `--name` | `-n` | The folder's name | Names the solution and its root namespace |
+| `--authorName` | `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
+| `--no-restore` | | Off | Skips the package restore that normally runs once the solution is created |
 
 Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanlambdafunction --help` lists them in the terminal.
 

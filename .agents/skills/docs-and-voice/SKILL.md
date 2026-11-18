@@ -34,6 +34,7 @@ The templates are always listed in the same order: Minimal API, MCP, GraphQL, We
 3. Change the docs in the same pull request as the behaviour they describe.
 4. Guides go to the docs site repository, not into this repository.
 5. Release notes come from pull request titles, so write titles as plain sentences about the change.
+6. In an options table, put an option's long and short form on separate lines, `--name`<br>`-n`, never `--name`, `-n` on one line where it can wrap in the middle. `NUGET.md` gives the short form its own column instead, because NuGet doesn't render HTML.
 
 ### Accessibility
 
