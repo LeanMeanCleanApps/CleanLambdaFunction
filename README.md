@@ -141,7 +141,7 @@ dotnet new update
 
 ## Contributing
 
-Bug reports, ideas and pull requests are all welcome, and typo fixes doubly so. Start with the [contributing guide](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Security problems go through the [security policy](SECURITY.md), not an issue.
+Bug reports, ideas and pull requests are all welcome, and typo fixes doubly so. Start with the [contributing guide](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Security problems go through the [security policy](SECURITY.md), not an issue. Questions go to [Discussions](https://github.com/orgs/LeanMeanCleanApps/discussions), and if anything here gets in your way, the [accessibility statement](ACCESSIBILITY.md) says how to tell us.
 
 ## Who built this
 

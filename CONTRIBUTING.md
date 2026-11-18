@@ -56,6 +56,10 @@ dotnet new uninstall ./
 1. Follow the style in `.editorconfig` and `Directory.Build.props`. Warnings are treated as errors, so the build must be clean. A warning is just an error that hasn't been caught yet.
 1. Update the README or docs if behaviour changes.
 
+If your change touches anything people read or click, keep it usable for everyone: alt text on images that mean something, link text that makes sense on its own, headings in order, and never colour alone to say something. The same goes for the messages the template returns, which should say what went wrong in plain words. The [accessibility statement](ACCESSIBILITY.md) has the rest.
+
+Contributions come in under the same [MIT licence](LICENSE.md) as the rest of the repository. There's no CLA to sign, no form to fax, and no lawyer in sight.
+
 ## Working with an AI agent
 
 Agents are welcome here, as long as a person stays in charge. [AGENTS.md](AGENTS.md) is the agent's map of the repository, [Jacques](.agents/agents/jacques.md), our sous-chef, is the persona they work as, and [.agents/skills](.agents/skills) holds one skill per kind of change, in the open Agent Skills format that most coding agents understand. If you change how something is done, update its skill in the same pull request. Out-of-date recipes are how kitchens catch fire.
@@ -65,7 +69,7 @@ Agents are welcome here, as long as a person stays in charge. [AGENTS.md](AGENTS
 1. Open the pull request against `main` and fill in the template.
 1. Link the issue it resolves, for example `Closes #123`.
 1. Every check must pass: Build, Test, Static Analysis, Dependency Review, Container Scan and Summary. The Summary comment on your pull request says which one is unhappy and links to the details.
-1. The maintainer reviews every pull request and squash-merges it once it's green. That's not a lack of trust, it's just how the lights stay on. If a review takes a while, a polite nudge is fine.
+1. The maintainer reviews every pull request and squash-merges it once it's green. That's not a lack of trust, it's just how the lights stay on. If a review takes a while, a polite nudge is fine. [Governance](https://github.com/LeanMeanCleanApps/.github/blob/main/GOVERNANCE.md) says how decisions get made, and what's in scope.
 
 ## Getting help
 

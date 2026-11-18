@@ -14,6 +14,7 @@ The template releases once a month, on the 1st at 09:17 America/Chicago, from `m
 | When | What runs |
 | --- | --- |
 | The 1st, 09:17 America/Chicago | The full pipeline on `main`, then Release Check and Publish |
+| The 1st, after the release | The month's numbers are recorded (see After the 1st) |
 | The 2nd | The organisation's project board moves the month's work to Released and closes its milestone |
 | The 15th, 09:17 America/Chicago | Maintenance: Dependabot's grouped pull request and a scheduled build. No release |
 
@@ -32,6 +33,10 @@ Versions are the build date and run number, `YYYY.MM.DD.<run>`, like `2026.12.01
 1. Make sure everything meant for the month is merged and `main` is green.
 2. Rehearse: run **Build Pipeline** from the Actions page with `run: release` and `dry-run: true`. It runs Release Check and Publish, logs in to NuGet and builds the SBOM, but pushes, attests and releases nothing. Dry runs work from any branch.
 3. Read the run summary: Release Check says what it compared and whether it would publish.
+
+### After the 1st
+
+Record the month's numbers once the release is out: NuGet downloads, stars, forks and the last 14 days of traffic for every public repository. The commands are in `metrics/` in the organisation's private scripts repository, and one run covers all five templates, so do it once, not five times. GitHub only keeps 14 days of traffic, so a missed month is gone for good.
 
 ### An out-of-cycle release
 
