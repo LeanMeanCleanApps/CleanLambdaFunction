@@ -10,6 +10,7 @@
 - **Have an idea?** Open a [feature request](https://github.com/LeanMeanCleanApps/CleanLambdaFunction/issues/new?template=feature_request.yml).
 - **Something got in your way?** Report an [accessibility barrier](https://github.com/LeanMeanCleanApps/leanmeancleanapps.github.io/issues/new?template=accessibility_barrier.yml). The [accessibility statement](ACCESSIBILITY.md) says what happens next.
 - **Found a security vulnerability?** Don't open an issue. Follow the [security policy](SECURITY.md).
+- **Anything else, or something you'd rather not say in public?** Email [hello@leanmeanclean.dev](mailto:hello@leanmeanclean.dev).
 
 This is a [Lean Mean Clean Apps](https://leanmeanclean.dev/) project, looked after in spare time by a team that is currently one person with a day job and a coffee habit, so responses are best effort. They do arrive.
 
